@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexOS — Seu Espaço Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f1a;
+  --bg2: #131624;
+  --bg3: #1a1f35;
+  --surface: #1e2440;
+  --surface2: #252c4a;
+  --accent: #6c63ff;
+  --accent2: #4ecdc4;
+  --accent3: #ff6b9d;
+  --text: #e8eaf6;
+  --text2: #9499c2;
+  --text3: #5a5f8a;
+  --border: rgba(108,99,255,0.18);
+  --border2: rgba(255,255,255,0.07);
+  --radius: 14px;
+  --radius2: 22px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --font: 'Space Grotesk', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+  --taskbar-h: 62px;
+  --eye-filter: none;
+  --icon-scale: 1;
+  --font-scale: 1;
+  --task-justify: flex-start;
+}
+.eye-comfort {
+  --bg: #0e0c07;
+  --bg2: #16130a;
+  --bg3: #1e1a0f;
+  --surface: #25200f;
+  --surface2: #2e2815;
+  --accent: #c9a84c;
+  --accent2: #a8c47a;
+  --accent3: #d4875a;
+  --text: #f5edd8;
+  --text2: #b8a97a;
+  --text3: #7a6e4a;
+  --border: rgba(201,168,76,0.2);
+  --eye-filter: sepia(0.35) brightness(0.92) saturate(0.75);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:var(--font); filter:var(--eye-filter); transition:filter 0.5s, background 0.5s, color 0.5s; }
+
+/* TASKBAR */
+#taskbar {
+  position:fixed; bottom:0; left:0; right:0; height:var(--taskbar-h);
+  background:rgba(13,15,26,0.85); backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);
+  display:flex; align-items:center;
+  padding:0 20px; gap:10px; z-index:1000;
+  justify-content: var(--task-justify);
+}
+.tb-app {
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:6px 10px; border-radius:var(--radius); cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  border:1px solid transparent; position:relative; flex-shrink:0;
+}
+.tb-app:hover { background:var(--surface2); border-color:var(--border); transform:translateY(-5px) scale(calc(1.05 * var(--icon-scale))); }
+.tb-app.active { background:var(--surface); border-color:var(--accent); }
+.tb-app .tb-icon {
+  width:calc(32px * var(--icon-scale)); height:calc(32px * var(--icon-scale));
+  border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-size:calc(18px * var(--icon-scale)); transition:all 0.25s;
+}
+.tb-app .tb-label { font-size:calc(9px * var(--font-scale)); color:var(--text2); white-space:nowrap; }
+.tb-dot { width:4px; height:4px; border-radius:50%; background:var(--accent); position:absolute; bottom:3px; }
+.tb-divider { width:1px; height:36px; background:var(--border2); margin:0 4px; flex-shrink:0; }
+.tb-spacer { flex:1; }
+#clock-tb { font-family:var(--mono); font-size:calc(13px * var(--font-scale)); color:var(--text2); white-space:nowrap; text-align:right; }
+
+/* PAGES */
+.page { position:fixed; inset:0; bottom:var(--taskbar-h); overflow-y:auto; overflow-x:hidden; display:none; animation:fadeIn 0.35s ease; }
+.page.active { display:flex; flex-direction:column; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* HOME PAGE */
+#page-home {
+  background: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(78,205,196,0.08) 0%, transparent 60%), var(--bg);
+  padding:30px 40px; gap:20px; align-items:flex-start;
+}
+.home-header { display:flex; align-items:center; gap:20px; width:100%; }
+.logo-mark {
+  width:52px; height:52px; border-radius:16px;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-size:24px; font-weight:800; color:#fff;
+  animation:logoPulse 3s ease-in-out infinite; flex-shrink:0;
+}
+@keyframes logoPulse { 0%,100%{box-shadow:0 0 0 0 rgba(108,99,255,0.4)} 50%{box-shadow:0 0 0 12px rgba(108,99,255,0)} }
+.site-name { font-family:var(--display); font-size:calc(26px * var(--font-scale)); font-weight:800; background:linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.site-tagline { font-size:calc(12px * var(--font-scale)); color:var(--text2); margin-top:2px; }
+.home-meta { margin-left:auto; text-align:right; }
+.home-clock { font-family:var(--mono); font-size:calc(28px * var(--font-scale)); font-weight:500; color:var(--text); letter-spacing:2px; }
+.home-date { font-size:calc(12px * var(--font-scale)); color:var(--text2); margin-top:2px; }
+.creator-btn {
+  margin-left:16px; padding:8px 16px; border-radius:40px;
+  background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); font-size:calc(12px * var(--font-scale)); cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  text-decoration:none;
+}
+.creator-btn:hover { background:var(--accent); border-color:var(--accent); transform:scale(1.05) translateY(-2px); }
+.home-widgets { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; width:100%; }
+.widget {
+  background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius2);
+  padding:18px; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative; overflow:hidden;
+}
+.widget:hover { transform:translateY(-4px); border-color:var(--border); box-shadow:0 16px 40px rgba(0,0,0,0.3); }
+.widget::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(255,255,255,0.03), transparent); pointer-events:none; }
+.widget-title { font-size:calc(11px * var(--font-scale)); color:var(--text3); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+.widget-value { font-size:calc(22px * var(--font-scale)); font-weight:600; color:var(--text); }
+.widget-sub { font-size:calc(11px * var(--font-scale)); color:var(--text2); margin-top:4px; }
+.widget-icon { position:absolute; top:14px; right:14px; font-size:20px; opacity:0.4; }
+.weather-main { display:flex; align-items:center; gap:12px; }
+.weather-temp { font-size:calc(36px * var(--font-scale)); font-weight:300; }
+.weather-info { font-size:calc(12px * var(--font-scale)); color:var(--text2); }
+.weather-emoji { font-size:42px; animation:weatherFloat 3s ease-in-out infinite; }
+@keyframes weatherFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.news-item { padding:8px 0; border-bottom:1px solid var(--border2); }
+.news-item:last-child { border:none; }
+.news-headline { font-size:calc(12px * var(--font-scale)); color:var(--text); line-height:1.4; }
+.news-time { font-size:calc(10px * var(--font-scale)); color:var(--text3); margin-top:2px; }
+.mini-calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-day-h { font-size:9px; color:var(--text3); text-align:center; padding:2px 0; }
+.cal-day { font-size:calc(11px * var(--font-scale)); color:var(--text2); text-align:center; padding:4px 2px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+.cal-day:hover { background:var(--surface2); color:var(--text); }
+.cal-day.today { background:var(--accent); color:#fff; font-weight:600; }
+.cal-day.other { color:var(--text3); }
+.quick-apps { display:flex; gap:10px; flex-wrap:wrap; }
+.quick-app {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:12px; border-radius:var(--radius); background:var(--surface2);
+  border:1px solid var(--border2); cursor:pointer; flex:1; min-width:70px;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.quick-app:hover { background:var(--accent); border-color:var(--accent); transform:scale(1.08) translateY(-3px); }
+.quick-app:hover .quick-icon { transform:rotate(10deg) scale(1.2); }
+.quick-icon { font-size:calc(22px * var(--icon-scale)); transition:transform 0.25s; }
+.quick-label { font-size:calc(10px * var(--font-scale)); color:var(--text2); text-align:center; }
+.quick-app:hover .quick-label { color:#fff; }
+
+/* EYE COMFORT TOGGLE */
+.eye-toggle {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 14px; border-radius:30px;
+  background:var(--surface2); border:1px solid var(--border);
+  cursor:pointer; transition:all 0.3s; flex-shrink:0;
+}
+.eye-toggle:hover { border-color:var(--accent); }
+.eye-toggle-dot {
+  width:32px; height:18px; border-radius:9px; background:var(--surface);
+  border:1px solid var(--border); position:relative; transition:background 0.3s;
+}
+.eye-toggle-dot::after {
+  content:''; position:absolute; top:2px; left:2px;
+  width:12px; height:12px; border-radius:50%;
+  background:var(--text3); transition:all 0.3s;
+}
+.eye-comfort .eye-toggle-dot { background:var(--accent); }
+.eye-comfort .eye-toggle-dot::after { left:16px; background:#fff; }
+.eye-label { font-size:calc(11px * var(--font-scale)); color:var(--text2); white-space:nowrap; }
+
+/* APP PAGES */
+.app-page-header {
+  padding:28px 36px 16px; display:flex; align-items:center; gap:14px;
+  border-bottom:1px solid var(--border2); flex-shrink:0;
+}
+.app-page-icon { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+.app-page-title { font-family:var(--display); font-size:calc(22px * var(--font-scale)); font-weight:700; color:var(--text); }
+.app-page-sub { font-size:calc(12px * var(--font-scale)); color:var(--text2); }
+.app-content { flex:1; padding:24px 36px; }
+
+/* CALCULATOR */
+#page-calc { background:var(--bg2); }
+.calc-wrap { max-width:340px; background:var(--surface); border-radius:var(--radius2); overflow:hidden; box-shadow:var(--shadow); }
+.calc-display {
+  padding:20px 22px; background:var(--bg); min-height:90px;
+  display:flex; flex-direction:column; align-items:flex-end; justify-content:flex-end;
+}
+.calc-expr { font-size:calc(13px * var(--font-scale)); color:var(--text3); font-family:var(--mono); min-height:18px; }
+.calc-num { font-size:calc(36px * var(--font-scale)); color:var(--text); font-family:var(--mono); font-weight:300; }
+.calc-btns { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--bg); }
+.cb {
+  padding:18px; font-size:calc(16px * var(--font-scale)); cursor:pointer;
+  background:var(--surface2); color:var(--text); border:none;
+  transition:all 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  font-family:var(--font);
+}
+.cb:hover { background:var(--surface); transform:scale(0.96); }
+.cb:active { transform:scale(0.9); }
+.cb.op { color:var(--accent); font-weight:600; }
+.cb.eq { background:var(--accent); color:#fff; font-weight:600; }
+.cb.eq:hover { background:var(--accent2); }
+.cb.clr { color:var(--accent3); }
+.cb.span2 { grid-column:span 2; }
+
+/* TODO */
+#page-todo { background:var(--bg2); }
+.todo-input-row { display:flex; gap:10px; margin-bottom:20px; }
+.todo-input {
+  flex:1; padding:12px 16px; border-radius:var(--radius); background:var(--surface2);
+  border:1px solid var(--border2); color:var(--text); font-size:calc(14px * var(--font-scale));
+  font-family:var(--font); outline:none; transition:border 0.2s;
+}
+.todo-input:focus { border-color:var(--accent); }
+.btn-primary {
+  padding:12px 20px; border-radius:var(--radius); background:var(--accent);
+  border:none; color:#fff; cursor:pointer; font-size:calc(14px * var(--font-scale));
+  font-family:var(--font); font-weight:600;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.btn-primary:hover { transform:scale(1.05) translateY(-2px); box-shadow:0 8px 20px rgba(108,99,255,0.4); }
+.todo-filters { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.todo-filter {
+  padding:6px 14px; border-radius:20px; background:var(--surface2);
+  border:1px solid var(--border2); color:var(--text2); cursor:pointer;
+  font-size:calc(12px * var(--font-scale)); transition:all 0.2s;
+}
+.todo-filter.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.todo-item {
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  background:var(--surface); border-radius:var(--radius); margin-bottom:8px;
+  border:1px solid var(--border2); transition:all 0.3s;
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+.todo-item:hover { border-color:var(--border); transform:translateX(4px); }
+.todo-check {
+  width:20px; height:20px; border-radius:6px; border:2px solid var(--text3);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.2s;
+}
+.todo-check.done { background:var(--accent2); border-color:var(--accent2); }
+.todo-text { flex:1; font-size:calc(14px * var(--font-scale)); }
+.todo-text.done { text-decoration:line-through; color:var(--text3); }
+.todo-del { background:none; border:none; color:var(--text3); cursor:pointer; font-size:18px; padding:4px; border-radius:6px; transition:all 0.2s; }
+.todo-del:hover { color:var(--accent3); background:rgba(255,107,157,0.1); }
+.todo-priority { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* NOTES */
+#page-notes { background:var(--bg2); }
+.notes-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px; }
+.note-card {
+  background:var(--surface); border-radius:var(--radius); padding:16px;
+  border:1px solid var(--border2); cursor:pointer; transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  animation:fadeUp 0.3s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.note-card:hover { transform:translateY(-4px) scale(1.02); border-color:var(--border); }
+.note-card-title { font-size:calc(14px * var(--font-scale)); font-weight:600; color:var(--text); margin-bottom:6px; }
+.note-card-body { font-size:calc(12px * var(--font-scale)); color:var(--text2); line-height:1.5; }
+.note-card-date { font-size:calc(10px * var(--font-scale)); color:var(--text3); margin-top:10px; }
+.note-editor { display:none; flex-direction:column; height:100%; }
+.note-editor.open { display:flex; }
+.note-title-input {
+  font-size:calc(22px * var(--font-scale)); font-family:var(--display); font-weight:700;
+  background:none; border:none; color:var(--text); outline:none; margin-bottom:12px;
+}
+.note-body-input {
+  flex:1; background:none; border:none; color:var(--text2); outline:none;
+  font-size:calc(14px * var(--font-scale)); font-family:var(--font); line-height:1.8;
+  resize:none;
+}
+
+/* WEATHER PAGE */
+#page-weather { background:var(--bg2); }
+.weather-big { text-align:center; padding:40px 20px; }
+.weather-big-emoji { font-size:80px; animation:weatherFloat 3s ease-in-out infinite; }
+.weather-big-temp { font-size:calc(72px * var(--font-scale)); font-weight:200; color:var(--text); margin:10px 0; }
+.weather-big-desc { font-size:calc(18px * var(--font-scale)); color:var(--text2); }
+.weather-details { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:12px; margin-top:30px; }
+.weather-detail { background:var(--surface); border-radius:var(--radius); padding:16px; text-align:center; border:1px solid var(--border2); transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+.weather-detail:hover { transform:scale(1.05); border-color:var(--border); }
+.weather-detail-icon { font-size:22px; margin-bottom:6px; }
+.weather-detail-val { font-size:calc(18px * var(--font-scale)); font-weight:600; }
+.weather-detail-lbl { font-size:calc(11px * var(--font-scale)); color:var(--text3); margin-top:2px; }
+
+/* CONVERTER */
+#page-converter { background:var(--bg2); }
+.conv-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+.conv-tab {
+  padding:8px 18px; border-radius:20px; background:var(--surface2);
+  border:1px solid var(--border2); color:var(--text2); cursor:pointer;
+  font-size:calc(13px * var(--font-scale)); transition:all 0.2s;
+}
+.conv-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.conv-row { display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:center; margin-bottom:16px; }
+.conv-input-wrap { background:var(--surface); border-radius:var(--radius); padding:14px 16px; border:1px solid var(--border2); }
+.conv-label { font-size:calc(11px * var(--font-scale)); color:var(--text3); margin-bottom:4px; }
+.conv-input { background:none; border:none; color:var(--text); font-size:calc(22px * var(--font-scale)); font-family:var(--mono); width:100%; outline:none; }
+.conv-select { background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 10px; border-radius:8px; font-family:var(--font); font-size:calc(13px * var(--font-scale)); outline:none; }
+.conv-swap {
+  width:40px; height:40px; border-radius:50%; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:18px; transition:all 0.3s; flex-shrink:0;
+}
+.conv-swap:hover { background:var(--accent); color:#fff; transform:rotate(180deg); }
+
+/* POMODORO */
+#page-pomodoro { background:var(--bg2); }
+.pomo-wrap { max-width:400px; text-align:center; }
+.pomo-mode-tabs { display:flex; gap:6px; margin-bottom:30px; justify-content:center; }
+.pomo-mode {
+  padding:8px 18px; border-radius:20px; background:var(--surface2);
+  border:1px solid var(--border2); cursor:pointer; font-size:calc(13px * var(--font-scale));
+  color:var(--text2); transition:all 0.2s;
+}
+.pomo-mode.active { background:var(--accent3); border-color:var(--accent3); color:#fff; }
+.pomo-ring { position:relative; width:220px; height:220px; margin:0 auto 24px; }
+.pomo-svg { width:100%; height:100%; transform:rotate(-90deg); }
+.pomo-track { fill:none; stroke:var(--surface2); stroke-width:10; }
+.pomo-progress { fill:none; stroke:var(--accent3); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.pomo-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.pomo-time { font-size:calc(46px * var(--font-scale)); font-family:var(--mono); font-weight:300; color:var(--text); }
+.pomo-label { font-size:calc(12px * var(--font-scale)); color:var(--text3); letter-spacing:2px; text-transform:uppercase; }
+.pomo-btns { display:flex; gap:12px; justify-content:center; margin-top:20px; }
+.pomo-btn {
+  width:52px; height:52px; border-radius:50%; border:2px solid var(--border);
+  background:var(--surface); cursor:pointer; font-size:20px; color:var(--text);
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pomo-btn:hover { border-color:var(--accent); background:var(--accent); transform:scale(1.1); }
+.pomo-btn.play { width:64px; height:64px; border-color:var(--accent3); font-size:24px; }
+.pomo-btn.play:hover { background:var(--accent3); border-color:var(--accent3); }
+
+/* PROFILE PAGE */
+#page-profile { background:var(--bg2); }
+.profile-wrap { max-width:560px; }
+.profile-avatar-section { display:flex; align-items:center; gap:24px; margin-bottom:28px; padding:24px; background:var(--surface); border-radius:var(--radius2); border:1px solid var(--border2); }
+.profile-avatar {
+  width:88px; height:88px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; color:#fff;
+  cursor:pointer; position:relative; flex-shrink:0; transition:all 0.3s;
+  overflow:hidden;
+}
+.profile-avatar:hover::after { content:'📷'; position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; font-size:24px; border-radius:50%; }
+.profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.profile-name { font-size:calc(22px * var(--font-scale)); font-weight:700; font-family:var(--display); }
+.profile-email { font-size:calc(13px * var(--font-scale)); color:var(--text2); margin-top:4px; }
+.profile-since { font-size:calc(11px * var(--font-scale)); color:var(--text3); margin-top:6px; }
+.profile-form { display:flex; flex-direction:column; gap:14px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-label { font-size:calc(12px * var(--font-scale)); color:var(--text2); }
+.form-input {
+  padding:12px 14px; border-radius:var(--radius); background:var(--surface2);
+  border:1px solid var(--border2); color:var(--text); font-size:calc(14px * var(--font-scale));
+  font-family:var(--font); outline:none; transition:border 0.2s;
+}
+.form-input:focus { border-color:var(--accent); }
+.btn-danger {
+  padding:10px 20px; border-radius:var(--radius); background:rgba(255,107,157,0.1);
+  border:1px solid var(--accent3); color:var(--accent3); cursor:pointer;
+  font-size:calc(13px * var(--font-scale)); font-family:var(--font);
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.btn-danger:hover { background:var(--accent3); color:#fff; transform:scale(1.03); }
+.btn-secondary {
+  padding:10px 20px; border-radius:var(--radius); background:var(--surface2);
+  border:1px solid var(--border2); color:var(--text2); cursor:pointer;
+  font-size:calc(13px * var(--font-scale)); font-family:var(--font);
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.btn-secondary:hover { border-color:var(--accent); color:var(--text); transform:scale(1.03); }
+
+/* SETTINGS PANEL */
+#settings-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:2000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(8px); animation:fadeIn 0.2s; }
+#settings-overlay.open { display:flex; }
+#settings-panel {
+  width:min(520px, 92vw); max-height:80vh; overflow-y:auto;
+  background:var(--bg3); border-radius:var(--radius2); border:1px solid var(--border);
+  padding:28px; animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn { from{opacity:0;transform:scale(0.9) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.settings-title { font-family:var(--display); font-size:calc(20px * var(--font-scale)); font-weight:700; margin-bottom:22px; }
+.settings-section { margin-bottom:22px; }
+.settings-section-title { font-size:calc(11px * var(--font-scale)); color:var(--text3); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border2); }
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; gap:16px; }
+.settings-row-label { font-size:calc(14px * var(--font-scale)); color:var(--text); }
+.settings-row-sub { font-size:calc(11px * var(--font-scale)); color:var(--text3); }
+.range-input { -webkit-appearance:none; width:120px; height:4px; border-radius:2px; background:var(--surface2); outline:none; }
+.range-input::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; transition:transform 0.2s; }
+.range-input::-webkit-slider-thumb:hover { transform:scale(1.3); }
+.font-select {
+  padding:6px 10px; border-radius:8px; background:var(--surface2); border:1px solid var(--border2);
+  color:var(--text); font-size:calc(13px * var(--font-scale)); outline:none; font-family:var(--font);
+}
+.color-row { display:flex; gap:8px; flex-wrap:wrap; }
+.color-dot {
+  width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid transparent;
+  transition:all 0.2s; flex-shrink:0;
+}
+.color-dot:hover { transform:scale(1.2); }
+.color-dot.active { border-color:#fff; transform:scale(1.15); }
+.close-btn {
+  position:absolute; top:16px; right:16px; width:32px; height:32px;
+  border-radius:50%; background:var(--surface2); border:none; color:var(--text2);
+  cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.close-btn:hover { background:var(--accent3); color:#fff; transform:rotate(90deg); }
+#settings-panel { position:relative; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface); border:1px solid var(--border); border-radius:30px;
+  padding:10px 20px; font-size:calc(13px * var(--font-scale)); color:var(--text);
+  z-index:3000; opacity:0; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--accent); }
+
+/* ICON COLORS */
+.icon-purple { background:rgba(108,99,255,0.15); color:var(--accent); }
+.icon-teal { background:rgba(78,205,196,0.15); color:var(--accent2); }
+.icon-pink { background:rgba(255,107,157,0.15); color:var(--accent3); }
+.icon-amber { background:rgba(255,190,77,0.15); color:#ffbe4d; }
+.icon-green { background:rgba(100,220,130,0.15); color:#64dc82; }
+.icon-blue { background:rgba(100,160,255,0.15); color:#64a0ff; }
+
+/* RESPONSIVE */
+@media(max-width:600px) {
+  #page-home { padding:16px; }
+  .home-header { flex-wrap:wrap; }
+  .app-content { padding:16px; }
+  .app-page-header { padding:16px; }
+}
+
+/* NOTE BACK BTN */
+.back-btn {
+  padding:8px 16px; border-radius:var(--radius); background:var(--surface2);
+  border:1px solid var(--border2); color:var(--text2); cursor:pointer;
+  font-size:calc(13px * var(--font-scale)); transition:all 0.2s;
+  display:flex; align-items:center; gap:6px;
+}
+.back-btn:hover { border-color:var(--accent); color:var(--text); }
+</style>
+</head>
+<body>
+
+<!-- PAGES -->
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="home-header">
+    <div class="logo-mark">N</div>
+    <div>
+      <div class="site-name">NexOS</div>
+      <div class="site-tagline">Seu espaço digital pessoal</div>
+    </div>
+    <div class="home-meta">
+      <div class="home-clock" id="home-clock">00:00:00</div>
+      <div class="home-date" id="home-date"></div>
+    </div>
+    <a href="https://github.com/enzopiotto9-cyber" target="_blank" class="creator-btn">
+      <span>👨‍💻</span> Criador
+    </a>
+    <div class="eye-toggle" onclick="toggleEyeComfort()" title="Conforto ocular">
+      <span style="font-size:14px">🌙</span>
+      <div class="eye-toggle-dot"></div>
+      <span class="eye-label">Conforto</span>
+    </div>
+  </div>
+
+  <div class="home-widgets">
+    <!-- Weather widget -->
+    <div class="widget" style="grid-column:span 2;min-width:0" id="weather-widget">
+      <div class="widget-title">Clima Atual</div>
+      <div class="weather-main">
+        <div class="weather-emoji" id="w-emoji">⛅</div>
+        <div>
+          <div class="weather-temp" id="w-temp">--°C</div>
+          <div class="weather-info" id="w-desc">Carregando...</div>
+          <div class="weather-info" id="w-city" style="margin-top:4px;font-size:11px;opacity:0.7">São Paulo, BR</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:10px">
+        <span style="font-size:11px;color:var(--text3)" id="w-humidity">💧 --%</span>
+        <span style="font-size:11px;color:var(--text3)" id="w-wind">💨 -- km/h</span>
+        <span style="font-size:11px;color:var(--text3)" id="w-feels">🌡️ --°C</span>
+      </div>
+    </div>
+
+    <!-- Mini Calendar -->
+    <div class="widget">
+      <div class="widget-title" id="cal-month-title">Junho 2025</div>
+      <div class="mini-calendar" id="mini-cal">
+        <div class="cal-day-h">D</div><div class="cal-day-h">S</div><div class="cal-day-h">T</div><div class="cal-day-h">Q</div><div class="cal-day-h">Q</div><div class="cal-day-h">S</div><div class="cal-day-h">S</div>
+      </div>
+    </div>
+
+    <!-- Quote widget -->
+    <div class="widget" id="quote-widget">
+      <div class="widget-title">✨ Frase do Dia</div>
+      <div style="font-size:14px;color:var(--text);line-height:1.6;font-style:italic" id="quote-text">"A jornada de mil milhas começa com um único passo."</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px" id="quote-author">— Lao Tzu</div>
+      <button onclick="newQuote()" class="back-btn" style="margin-top:12px;font-size:11px;padding:6px 12px">🎲 Nova frase</button>
+    </div>
+
+    <!-- Quick apps -->
+    <div class="widget" style="grid-column:span 2;min-width:0">
+      <div class="widget-title">Acesso Rápido</div>
+      <div class="quick-apps">
+        <div class="quick-app" onclick="switchPage('calc')"><div class="quick-icon">🧮</div><div class="quick-label">Calculadora</div></div>
+        <div class="quick-app" onclick="switchPage('todo')"><div class="quick-icon">✅</div><div class="quick-label">Tarefas</div></div>
+        <div class="quick-app" onclick="switchPage('notes')"><div class="quick-icon">📝</div><div class="quick-label">Notas</div></div>
+        <div class="quick-app" onclick="switchPage('weather')"><div class="quick-icon">🌤️</div><div class="quick-label">Clima</div></div>
+        <div class="quick-app" onclick="switchPage('converter')"><div class="quick-icon">🔄</div><div class="quick-label">Conversor</div></div>
+        <div class="quick-app" onclick="switchPage('pomodoro')"><div class="quick-icon">⏱️</div><div class="quick-label">Pomodoro</div></div>
+      </div>
+    </div>
+
+    <!-- Stats widget -->
+    <div class="widget">
+      <div class="widget-title">📊 Suas Estatísticas</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--text2)">Tarefas hoje</span>
+          <span style="font-size:14px;font-weight:600" id="stat-tasks">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--text2)">Notas salvas</span>
+          <span style="font-size:14px;font-weight:600" id="stat-notes">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--text2)">Pomodoros</span>
+          <span style="font-size:14px;font-weight:600" id="stat-pomos">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Battery/system widget -->
+    <div class="widget">
+      <div class="widget-title">⚡ Sistema</div>
+      <div id="battery-info" style="font-size:12px;color:var(--text2);line-height:2">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULATOR -->
+<div class="page" id="page-calc">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-purple">🧮</div>
+    <div><div class="app-page-title">Calculadora</div><div class="app-page-sub">Operações matemáticas</div></div>
+  </div>
+  <div class="app-content" style="display:flex;justify-content:center">
+    <div class="calc-wrap">
+      <div class="calc-display">
+        <div class="calc-expr" id="calc-expr"></div>
+        <div class="calc-num" id="calc-display">0</div>
+      </div>
+      <div class="calc-btns">
+        <button class="cb clr" onclick="calcBtn('AC')">AC</button>
+        <button class="cb op" onclick="calcBtn('+/-')">+/-</button>
+        <button class="cb op" onclick="calcBtn('%')">%</button>
+        <button class="cb op" onclick="calcBtn('÷')">÷</button>
+        <button class="cb" onclick="calcBtn('7')">7</button>
+        <button class="cb" onclick="calcBtn('8')">8</button>
+        <button class="cb" onclick="calcBtn('9')">9</button>
+        <button class="cb op" onclick="calcBtn('×')">×</button>
+        <button class="cb" onclick="calcBtn('4')">4</button>
+        <button class="cb" onclick="calcBtn('5')">5</button>
+        <button class="cb" onclick="calcBtn('6')">6</button>
+        <button class="cb op" onclick="calcBtn('-')">−</button>
+        <button class="cb" onclick="calcBtn('1')">1</button>
+        <button class="cb" onclick="calcBtn('2')">2</button>
+        <button class="cb" onclick="calcBtn('3')">3</button>
+        <button class="cb op" onclick="calcBtn('+')">+</button>
+        <button class="cb span2" onclick="calcBtn('0')">0</button>
+        <button class="cb" onclick="calcBtn('.')">.</button>
+        <button class="cb eq" onclick="calcBtn('=')">=</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TODO -->
+<div class="page" id="page-todo">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-teal">✅</div>
+    <div><div class="app-page-title">Organizador de Tarefas</div><div class="app-page-sub">Gerencie seu dia</div></div>
+  </div>
+  <div class="app-content">
+    <div class="todo-input-row">
+      <input class="todo-input" id="todo-input" placeholder="Nova tarefa..." onkeydown="if(event.key==='Enter')addTodo()">
+      <select id="todo-priority-sel" class="font-select">
+        <option value="low">🟢 Baixa</option>
+        <option value="med" selected>🟡 Média</option>
+        <option value="high">🔴 Alta</option>
+      </select>
+      <button class="btn-primary" onclick="addTodo()">+ Adicionar</button>
+    </div>
+    <div class="todo-filters">
+      <div class="todo-filter active" onclick="setTodoFilter('all', this)">Todas</div>
+      <div class="todo-filter" onclick="setTodoFilter('pending', this)">Pendentes</div>
+      <div class="todo-filter" onclick="setTodoFilter('done', this)">Concluídas</div>
+    </div>
+    <div id="todo-list"></div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<div class="page" id="page-notes">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-amber">📝</div>
+    <div><div class="app-page-title">Bloco de Notas</div><div class="app-page-sub">Suas anotações</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn-primary" onclick="newNote()" id="new-note-btn">+ Nova Nota</button>
+    </div>
+  </div>
+  <div class="app-content">
+    <div id="notes-grid-view">
+      <div class="notes-grid" id="notes-grid"></div>
+    </div>
+    <div id="note-editor-wrap" style="display:none;height:calc(100vh - 200px)">
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="back-btn" onclick="closeNoteEditor()">← Voltar</button>
+        <button class="btn-primary" onclick="saveNote()">💾 Salvar</button>
+        <button class="btn-danger" onclick="deleteCurrentNote()" style="margin-left:auto">🗑️ Excluir</button>
+      </div>
+      <input class="note-title-input" id="note-title" placeholder="Título da nota...">
+      <textarea class="note-body-input" id="note-body" placeholder="Escreva aqui..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- WEATHER -->
+<div class="page" id="page-weather">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-blue">🌤️</div>
+    <div><div class="app-page-title">Previsão do Tempo</div><div class="app-page-sub">Clima em tempo real</div></div>
+  </div>
+  <div class="app-content">
+    <div class="weather-big">
+      <div class="weather-big-emoji" id="pw-emoji">⛅</div>
+      <div class="weather-big-temp" id="pw-temp">--°C</div>
+      <div class="weather-big-desc" id="pw-desc">Carregando dados do clima...</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px" id="pw-city">📍 São Paulo, BR</div>
+    </div>
+    <div class="weather-details">
+      <div class="weather-detail"><div class="weather-detail-icon">💧</div><div class="weather-detail-val" id="pw-humidity">--%</div><div class="weather-detail-lbl">Umidade</div></div>
+      <div class="weather-detail"><div class="weather-detail-icon">💨</div><div class="weather-detail-val" id="pw-wind">-- km/h</div><div class="weather-detail-lbl">Vento</div></div>
+      <div class="weather-detail"><div class="weather-detail-icon">🌡️</div><div class="weather-detail-val" id="pw-feels">--°C</div><div class="weather-detail-lbl">Sensação</div></div>
+      <div class="weather-detail"><div class="weather-detail-icon">👁️</div><div class="weather-detail-val" id="pw-vis">-- km</div><div class="weather-detail-lbl">Visibilidade</div></div>
+      <div class="weather-detail"><div class="weather-detail-icon">🌅</div><div class="weather-detail-val" id="pw-sunrise">--:--</div><div class="weather-detail-lbl">Nascer do sol</div></div>
+      <div class="weather-detail"><div class="weather-detail-icon">🌇</div><div class="weather-detail-val" id="pw-sunset">--:--</div><div class="weather-detail-lbl">Pôr do sol</div></div>
+    </div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn-primary" onclick="loadWeather()">🔄 Atualizar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONVERTER -->
+<div class="page" id="page-converter">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-green">🔄</div>
+    <div><div class="app-page-title">Conversor Universal</div><div class="app-page-sub">Moedas, medidas, temperatura</div></div>
+  </div>
+  <div class="app-content">
+    <div class="conv-tabs">
+      <div class="conv-tab active" onclick="setConvTab('currency',this)">💰 Moedas</div>
+      <div class="conv-tab" onclick="setConvTab('length',this)">📏 Comprimento</div>
+      <div class="conv-tab" onclick="setConvTab('weight',this)">⚖️ Peso</div>
+      <div class="conv-tab" onclick="setConvTab('temp',this)">🌡️ Temperatura</div>
+    </div>
+    <div id="conv-body"></div>
+  </div>
+</div>
+
+<!-- POMODORO -->
+<div class="page" id="page-pomodoro">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-pink">⏱️</div>
+    <div><div class="app-page-title">Pomodoro Timer</div><div class="app-page-sub">Foco e produtividade</div></div>
+  </div>
+  <div class="app-content" style="display:flex;justify-content:center">
+    <div class="pomo-wrap">
+      <div class="pomo-mode-tabs">
+        <div class="pomo-mode active" onclick="setPomoMode('focus',this)">Foco</div>
+        <div class="pomo-mode" onclick="setPomoMode('short',this)">Pausa Curta</div>
+        <div class="pomo-mode" onclick="setPomoMode('long',this)">Pausa Longa</div>
+      </div>
+      <div class="pomo-ring">
+        <svg class="pomo-svg" viewBox="0 0 220 220">
+          <circle class="pomo-track" cx="110" cy="110" r="100"/>
+          <circle class="pomo-progress" id="pomo-ring" cx="110" cy="110" r="100" stroke-dasharray="628" stroke-dashoffset="0"/>
+        </svg>
+        <div class="pomo-center">
+          <div class="pomo-time" id="pomo-display">25:00</div>
+          <div class="pomo-label" id="pomo-label-txt">FOCO</div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:12px">
+        Sessão #<span id="pomo-session">1</span> • Completas: <span id="pomo-done">0</span>
+      </div>
+      <div class="pomo-btns">
+        <button class="pomo-btn" onclick="resetPomo()" title="Reset">↺</button>
+        <button class="pomo-btn play" id="pomo-play-btn" onclick="togglePomo()">▶</button>
+        <button class="pomo-btn" onclick="skipPomo()" title="Pular">⏭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="page" id="page-profile">
+  <div class="app-page-header">
+    <div class="app-page-icon icon-purple">👤</div>
+    <div><div class="app-page-title">Meu Perfil</div><div class="app-page-sub">Suas informações</div></div>
+  </div>
+  <div class="app-content">
+    <div class="profile-wrap">
+      <div class="profile-avatar-section">
+        <div class="profile-avatar" id="profile-avatar-disp" onclick="triggerAvatarUpload()">
+          <span id="profile-initials">U</span>
+          <img id="profile-img" src="" style="display:none">
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)">
+        <div>
+          <div class="profile-name" id="profile-name-disp">Usuário</div>
+          <div class="profile-email" id="profile-email-disp">usuario@email.com</div>
+          <div class="profile-since">Membro desde <span id="profile-since">hoje</span></div>
+        </div>
+      </div>
+      <div class="profile-form">
+        <div class="form-group">
+          <div class="form-label">Nome de usuário</div>
+          <input class="form-input" id="profile-name-input" placeholder="Seu nome" value="Usuário">
+        </div>
+        <div class="form-group">
+          <div class="form-label">E-mail</div>
+          <input class="form-input" id="profile-email-input" type="email" placeholder="seu@email.com" value="usuario@email.com">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Nova senha</div>
+          <input class="form-input" id="profile-pass-input" type="password" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Confirmar senha</div>
+          <input class="form-input" id="profile-pass2-input" type="password" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" onclick="saveProfile()">💾 Salvar alterações</button>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn-secondary" onclick="clearData()">🗑️ Limpar dados</button>
+          <button class="btn-danger" onclick="deleteAccount()">❌ Excluir conta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TASKBAR -->
+<div id="taskbar">
+  <div class="tb-app active" id="tb-home" onclick="switchPage('home')">
+    <div class="tb-icon icon-purple" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff">🏠</div>
+    <div class="tb-label">Início</div>
+    <div class="tb-dot"></div>
+  </div>
+  <div class="tb-divider"></div>
+  <div class="tb-app" id="tb-calc" onclick="switchPage('calc')">
+    <div class="tb-icon" style="background:rgba(108,99,255,0.12)">🧮</div>
+    <div class="tb-label">Calc</div>
+  </div>
+  <div class="tb-app" id="tb-todo" onclick="switchPage('todo')">
+    <div class="tb-icon" style="background:rgba(78,205,196,0.12)">✅</div>
+    <div class="tb-label">Tarefas</div>
+  </div>
+  <div class="tb-app" id="tb-notes" onclick="switchPage('notes')">
+    <div class="tb-icon" style="background:rgba(255,190,77,0.12)">📝</div>
+    <div class="tb-label">Notas</div>
+  </div>
+  <div class="tb-app" id="tb-weather" onclick="switchPage('weather')">
+    <div class="tb-icon" style="background:rgba(100,160,255,0.12)">🌤️</div>
+    <div class="tb-label">Clima</div>
+  </div>
+  <div class="tb-app" id="tb-converter" onclick="switchPage('converter')">
+    <div class="tb-icon" style="background:rgba(100,220,130,0.12)">🔄</div>
+    <div class="tb-label">Conversor</div>
+  </div>
+  <div class="tb-app" id="tb-pomodoro" onclick="switchPage('pomodoro')">
+    <div class="tb-icon" style="background:rgba(255,107,157,0.12)">⏱️</div>
+    <div class="tb-label">Pomodoro</div>
+  </div>
+  <div class="tb-app" id="tb-themes" onclick="openThemesMenu()">
+    <div class="tb-icon" style="background:rgba(255,255,255,0.05)">🎨</div>
+    <div class="tb-label">Temas</div>
+  </div>
+  <div class="tb-spacer"></div>
+  <div class="tb-app" id="tb-profile" onclick="switchPage('profile')">
+    <div class="tb-icon" style="background:rgba(108,99,255,0.12)">👤</div>
+    <div class="tb-label">Perfil</div>
+  </div>
+  <div class="tb-app" onclick="openSettings()">
+    <div class="tb-icon" style="background:rgba(255,255,255,0.05)">⚙️</div>
+    <div class="tb-label">Config</div>
+  </div>
+  <div class="tb-divider"></div>
+  <div id="clock-tb">00:00:00</div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-overlay" onclick="closeSettingsOutside(event)">
+  <div id="settings-panel">
+    <button class="close-btn" onclick="closeSettings()">✕</button>
+    <div class="settings-title">⚙️ Configurações</div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Perfil</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Conta</div><div class="settings-row-sub" id="settings-user-name">Usuário</div></div>
+        <button class="btn-secondary" onclick="closeSettings();switchPage('profile')" style="padding:6px 12px;font-size:12px">Ver perfil →</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Aparência</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Tamanho dos ícones</div><div class="settings-row-sub">Ajusta os ícones da barra</div></div>
+        <input type="range" class="range-input" min="0.7" max="1.5" step="0.1" value="1" id="icon-size-range" oninput="setIconScale(this.value)">
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Tamanho das fontes</div><div class="settings-row-sub">Texto geral</div></div>
+        <input type="range" class="range-input" min="0.8" max="1.3" step="0.05" value="1" id="font-size-range" oninput="setFontScale(this.value)">
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Fonte do site</div></div>
+        <select class="font-select" id="font-sel" onchange="setFont(this.value)">
+          <option value="'Space Grotesk', sans-serif">Space Grotesk</option>
+          <option value="'Syne', sans-serif">Syne</option>
+          <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+          <option value="Georgia, serif">Georgia</option>
+          <option value="'Trebuchet MS', sans-serif">Trebuchet</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Cor de destaque</div><div class="settings-row-sub">Cor principal do tema</div></div>
+        <div class="color-row">
+          <div class="color-dot active" style="background:#6c63ff" onclick="setAccent('#6c63ff','#4ecdc4',this)" title="Roxo"></div>
+          <div class="color-dot" style="background:#ff6b9d" onclick="setAccent('#ff6b9d','#ff9f7f',this)" title="Rosa"></div>
+          <div class="color-dot" style="background:#4ecdc4" onclick="setAccent('#4ecdc4','#6c63ff',this)" title="Teal"></div>
+          <div class="color-dot" style="background:#64a0ff" onclick="setAccent('#64a0ff','#7b61ff',this)" title="Azul"></div>
+          <div class="color-dot" style="background:#64dc82" onclick="setAccent('#64dc82','#4ecdc4',this)" title="Verde"></div>
+          <div class="color-dot" style="background:#ffbe4d" onclick="setAccent('#ffbe4d','#ff9f7f',this)" title="Âmbar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Barra de Tarefas</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Posição dos botões</div></div>
+        <select class="font-select" onchange="setTaskbarJustify(this.value)">
+          <option value="flex-start">Esquerda</option>
+          <option value="center">Centro</option>
+          <option value="flex-end">Direita</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Visual</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Conforto Ocular</div><div class="settings-row-sub">Amarelado e escuro</div></div>
+        <div class="eye-toggle" onclick="toggleEyeComfort()" style="padding:6px 10px">
+          <div class="eye-toggle-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Conta e Dados</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="clearData()">🗑️ Limpar dados</button>
+        <button class="btn-danger" onclick="deleteAccount()">❌ Excluir conta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="theme-dialog.js"></script>
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  todos: JSON.parse(localStorage.getItem('nx_todos') || '[]'),
+  notes: JSON.parse(localStorage.getItem('nx_notes') || '[]'),
+  profile: JSON.parse(localStorage.getItem('nx_profile') || '{"name":"Usuário","email":"usuario@email.com","since":"hoje","avatar":""}'),
+  pomos: parseInt(localStorage.getItem('nx_pomos') || '0'),
+  eyeComfort: localStorage.getItem('nx_eye') === '1',
+  todoFilter: 'all',
+  currentNote: null,
+  accentColor: localStorage.getItem('nx_accent') || '#6c63ff',
+  accent2Color: localStorage.getItem('nx_accent2') || '#4ecdc4',
+};
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  updateClock();
+  setInterval(updateClock, 1000);
+  buildCalendar();
+  renderTodos();
+  renderNotes();
+  loadWeather();
+  initConverter();
+  initPomodoro();
+  loadProfile();
+  loadSystemInfo();
+  newQuote();
+  updateStats();
+  applyAccent(state.accentColor, state.accent2Color);
+  if(state.eyeComfort) document.body.classList.add('eye-comfort');
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  const t = `${hh}:${mm}:${ss}`;
+  document.getElementById('home-clock').textContent = t;
+  document.getElementById('clock-tb').textContent = t;
+  const days = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('home-date').textContent = `${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+function buildCalendar() {
+  const now = new Date();
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-month-title').textContent = `📅 ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const cal = document.getElementById('mini-cal');
+  while(cal.children.length > 7) cal.removeChild(cal.lastChild);
+  const first = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+  const last = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cal-day other';cal.appendChild(d);}
+  for(let d=1;d<=last;d++){
+    const el=document.createElement('div');
+    el.className='cal-day'+(d===now.getDate()?' today':'');
+    el.textContent=d;
+    cal.appendChild(el);
+  }
+}
+
+// ============================================================
+// PAGE SWITCHING
+// ============================================================
+function switchPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tb-app').forEach(b=>b.classList.remove('active'));
+  const page = document.getElementById('page-'+id);
+  const tb = document.getElementById('tb-'+id);
+  if(page) page.classList.add('active');
+  if(tb) tb.classList.add('active');
+  updateStats();
+}
+
+// ============================================================
+// CALCULATOR
+// ============================================================
+let calcVal = '0', calcExpr = '', calcOp = null, calcNew = true;
+function calcBtn(v) {
+  const disp = document.getElementById('calc-display');
+  const expr = document.getElementById('calc-expr');
+  if(v === 'AC') { calcVal='0'; calcExpr=''; calcOp=null; calcNew=true; }
+  else if(v === '+/-') { calcVal = String(-parseFloat(calcVal)); }
+  else if(v === '%') { calcVal = String(parseFloat(calcVal)/100); }
+  else if(['÷','×','-','+'].includes(v)) {
+    calcExpr = calcVal + ' ' + v;
+    calcOp = v; calcNew = true;
+  }
+  else if(v === '=') {
+    if(calcOp && !calcNew) {
+      const a=parseFloat(calcExpr),b=parseFloat(calcVal);
+      let r;
+      if(calcOp==='÷') r=a/b; else if(calcOp==='×') r=a*b;
+      else if(calcOp==='-') r=a-b; else r=a+b;
+      calcExpr = calcExpr + ' ' + calcVal + ' =';
+      calcVal = String(parseFloat(r.toFixed(10)));
+      calcOp = null; calcNew = true;
+    }
+  }
+  else if(v==='.') {
+    if(calcNew) { calcVal='0.'; calcNew=false; }
+    else if(!calcVal.includes('.')) calcVal+='.';
+  }
+  else {
+    if(calcNew || calcVal==='0') { calcVal=v; calcNew=false; }
+    else calcVal+=v;
+  }
+  disp.textContent = calcVal;
+  expr.textContent = calcExpr;
+}
+
+// ============================================================
+// TODOS
+// ============================================================
+function addTodo() {
+  const inp = document.getElementById('todo-input');
+  const pri = document.getElementById('todo-priority-sel').value;
+  const text = inp.value.trim();
+  if(!text) return;
+  state.todos.unshift({ id: Date.now(), text, done: false, priority: pri, date: new Date().toLocaleDateString('pt-BR') });
+  inp.value = '';
+  saveTodos();
+  renderTodos();
+  updateStats();
+  showToast('✅ Tarefa adicionada!');
+}
+function toggleTodo(id) {
+  const t = state.todos.find(t=>t.id===id);
+  if(t) t.done = !t.done;
+  saveTodos(); renderTodos(); updateStats();
+}
+function deleteTodo(id) {
+  state.todos = state.todos.filter(t=>t.id!==id);
+  saveTodos(); renderTodos(); updateStats();
+}
+function setTodoFilter(f, el) {
+  state.todoFilter = f;
+  document.querySelectorAll('.todo-filter').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  renderTodos();
+}
+function renderTodos() {
+  const list = document.getElementById('todo-list');
+  let items = state.todos;
+  if(state.todoFilter==='pending') items = items.filter(t=>!t.done);
+  if(state.todoFilter==='done') items = items.filter(t=>t.done);
+  if(!items.length) { list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:40px;font-size:14px">Nenhuma tarefa aqui 🎉</div>'; return; }
+  const priColors = { low:'#64dc82', med:'#ffbe4d', high:'#ff6b9d' };
+  list.innerHTML = items.map(t => `
+    <div class="todo-item">
+      <div class="todo-priority" style="background:${priColors[t.priority]||'#888'}"></div>
+      <div class="todo-check ${t.done?'done':''}" onclick="toggleTodo(${t.id})">${t.done?'✓':''}</div>
+      <div class="todo-text ${t.done?'done':''}">${t.text}
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${t.date}</div>
+      </div>
+      <button class="todo-del" onclick="deleteTodo(${t.id})">🗑</button>
+    </div>
+  `).join('');
+}
+function saveTodos() { localStorage.setItem('nx_todos', JSON.stringify(state.todos)); }
+
+// ============================================================
+// NOTES
+// ============================================================
+let editingNoteId = null;
+function newNote() {
+  editingNoteId = null;
+  document.getElementById('note-title').value = '';
+  document.getElementById('note-body').value = '';
+  document.getElementById('notes-grid-view').style.display = 'none';
+  document.getElementById('note-editor-wrap').style.display = 'block';
+  document.getElementById('note-title').focus();
+}
+function openNote(id) {
+  const note = state.notes.find(n=>n.id===id);
+  if(!note) return;
+  editingNoteId = id;
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('note-body').value = note.body;
+  document.getElementById('notes-grid-view').style.display = 'none';
+  document.getElementById('note-editor-wrap').style.display = 'block';
+}
+function saveNote() {
+  const title = document.getElementById('note-title').value.trim() || 'Sem título';
+  const body = document.getElementById('note-body').value;
+  if(editingNoteId) {
+    const note = state.notes.find(n=>n.id===editingNoteId);
+    if(note) { note.title=title; note.body=body; note.date=new Date().toLocaleDateString('pt-BR'); }
+  } else {
+    state.notes.unshift({ id:Date.now(), title, body, date:new Date().toLocaleDateString('pt-BR') });
+  }
+  localStorage.setItem('nx_notes', JSON.stringify(state.notes));
+  closeNoteEditor();
+  renderNotes();
+  updateStats();
+  showToast('📝 Nota salva!');
+}
+function deleteCurrentNote() {
+  if(editingNoteId) { state.notes = state.notes.filter(n=>n.id!==editingNoteId); localStorage.setItem('nx_notes', JSON.stringify(state.notes)); }
+  closeNoteEditor(); renderNotes(); updateStats();
+  showToast('🗑️ Nota excluída');
+}
+function closeNoteEditor() {
+  document.getElementById('notes-grid-view').style.display = 'block';
+  document.getElementById('note-editor-wrap').style.display = 'none';
+}
+function renderNotes() {
+  const grid = document.getElementById('notes-grid');
+  if(!state.notes.length) { grid.innerHTML = '<div style="color:var(--text3);padding:40px;font-size:14px">Nenhuma nota ainda. Crie uma! 📝</div>'; return; }
+  const colors = ['rgba(108,99,255,0.08)','rgba(78,205,196,0.08)','rgba(255,107,157,0.08)','rgba(255,190,77,0.08)','rgba(100,220,130,0.08)'];
+  grid.innerHTML = state.notes.map((n,i) => `
+    <div class="note-card" onclick="openNote(${n.id})" style="border-color:${colors[i%colors.length].replace('0.08','0.3')};background:${colors[i%colors.length]}">
+      <div class="note-card-title">${n.title}</div>
+      <div class="note-card-body">${n.body.substring(0,80)}${n.body.length>80?'...':''}</div>
+      <div class="note-card-date">${n.date}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// WEATHER
+// ============================================================
+async function loadWeather() {
+  try {
+    const pos = await new Promise((res,rej) => navigator.geolocation.getCurrentPosition(res, rej, {timeout:5000}));
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m,apparent_temperature,visibility,windspeed_10m&daily=sunrise,sunset&timezone=auto&forecast_days=1`);
+    const data = await r.json();
+    const cw = data.current_weather;
+    const temp = Math.round(cw.temperature);
+    const wind = Math.round(cw.windspeed);
+    const codes = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌦️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'❄️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
+    const descs = {0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',45:'Neblina',51:'Chuvisco leve',53:'Chuvisco moderado',61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',71:'Nevada leve',80:'Chuva leve',81:'Chuva moderada',82:'Chuva forte',95:'Tempestade',99:'Tempestade com granizo'};
+    const emoji = codes[cw.weathercode] || '🌡️';
+    const desc = descs[cw.weathercode] || 'Variável';
+    const hi = data.hourly;
+    const hr = new Date().getHours();
+    const humidity = hi.relativehumidity_2m[hr] || '--';
+    const feels = hi.apparent_temperature ? Math.round(hi.apparent_temperature[hr]) : '--';
+    const vis = hi.visibility ? Math.round(hi.visibility[hr]/1000) : '--';
+    const sunrise = data.daily?.sunrise?.[0]?.slice(-5) || '--:--';
+    const sunset = data.daily?.sunset?.[0]?.slice(-5) || '--:--';
+    // Widget
+    document.getElementById('w-emoji').textContent = emoji;
+    document.getElementById('w-temp').textContent = temp+'°C';
+    document.getElementById('w-desc').textContent = desc;
+    document.getElementById('w-humidity').textContent = '💧 '+humidity+'%';
+    document.getElementById('w-wind').textContent = '💨 '+wind+' km/h';
+    document.getElementById('w-feels').textContent = '🌡️ '+feels+'°C';
+    // Page
+    document.getElementById('pw-emoji').textContent = emoji;
+    document.getElementById('pw-temp').textContent = temp+'°C';
+    document.getElementById('pw-desc').textContent = desc;
+    document.getElementById('pw-humidity').textContent = humidity+'%';
+    document.getElementById('pw-wind').textContent = wind+' km/h';
+    document.getElementById('pw-feels').textContent = feels+'°C';
+    document.getElementById('pw-vis').textContent = vis+' km';
+    document.getElementById('pw-sunrise').textContent = sunrise;
+    document.getElementById('pw-sunset').textContent = sunset;
+  } catch(e) {
+    // fallback
+    const els = ['w-temp','pw-temp'];
+    els.forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent='N/D'; });
+    document.getElementById('w-desc').textContent = 'Localização não disponível';
+    document.getElementById('pw-desc').textContent = 'Ative a localização para clima em tempo real';
+  }
+}
+
+// ============================================================
+// CONVERTER
+// ============================================================
+let convTab = 'currency';
+const convData = {
+  currency: {
+    units: ['BRL','USD','EUR','GBP','ARS','JPY'],
+    rates: {BRL:1,USD:0.19,EUR:0.17,GBP:0.15,ARS:175,JPY:28.5}
+  },
+  length: {
+    units: ['m','km','cm','mm','mi','ft','in'],
+    rates: {m:1,km:0.001,cm:100,mm:1000,mi:0.000621,ft:3.281,in:39.37}
+  },
+  weight: {
+    units: ['kg','g','lb','oz','t'],
+    rates: {kg:1,g:1000,lb:2.205,oz:35.274,t:0.001}
+  },
+  temp: { units: ['°C','°F','K'], rates: {} }
+};
+function setConvTab(tab, el) {
+  convTab=tab;
+  document.querySelectorAll('.conv-tab').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  renderConv();
+}
+function renderConv() {
+  const body = document.getElementById('conv-body');
+  const d = convData[convTab];
+  const units = d.units;
+  body.innerHTML = `
+    <div class="conv-row">
+      <div class="conv-input-wrap">
+        <div class="conv-label">De</div>
+        <select class="conv-select" id="conv-from" onchange="doConvert()">${units.map(u=>`<option>${u}</option>`).join('')}</select>
+        <input class="conv-input" type="number" id="conv-val" value="1" oninput="doConvert()">
+      </div>
+      <button class="conv-swap" onclick="swapConv()">⇄</button>
+      <div class="conv-input-wrap">
+        <div class="conv-label">Para</div>
+        <select class="conv-select" id="conv-to" onchange="doConvert()">${units.map((u,i)=>`<option ${i===1?'selected':''}>${u}</option>`).join('')}</select>
+        <div class="conv-input" id="conv-result" style="padding-top:4px">--</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);padding:8px 0" id="conv-note"></div>
+  `;
+  doConvert();
+}
+function doConvert() {
+  const from = document.getElementById('conv-from').value;
+  const to = document.getElementById('conv-to').value;
+  const val = parseFloat(document.getElementById('conv-val').value);
+  let result;
+  if(convTab==='temp') {
+    if(from==='°C'&&to==='°F') result=val*9/5+32;
+    else if(from==='°C'&&to==='K') result=val+273.15;
+    else if(from==='°F'&&to==='°C') result=(val-32)*5/9;
+    else if(from==='°F'&&to==='K') result=(val-32)*5/9+273.15;
+    else if(from==='K'&&to==='°C') result=val-273.15;
+    else if(from==='K'&&to==='°F') result=(val-273.15)*9/5+32;
+    else result=val;
+  } else {
+    const d=convData[convTab];
+    result = val / d.rates[from] * d.rates[to];
+  }
+  const r = document.getElementById('conv-result');
+  if(r) r.textContent = isNaN(result)?'--':parseFloat(result.toFixed(6)).toString();
+}
+function swapConv() {
+  const f=document.getElementById('conv-from'), t=document.getElementById('conv-to');
+  const tmp=f.value; f.value=t.value; t.value=tmp; doConvert();
+}
+function initConverter() { renderConv(); }
+
+// ============================================================
+// POMODORO
+// ============================================================
+let pomoMode='focus', pomoRunning=false, pomoInterval=null, pomoTotal=25*60, pomoLeft=25*60, pomoSession=1;
+const pomoTimes = {focus:25*60, short:5*60, long:15*60};
+const pomoLabels = {focus:'FOCO', short:'PAUSA CURTA', long:'PAUSA LONGA'};
+function initPomodoro() { renderPomoTime(); }
+function setPomoMode(mode, el) {
+  pomoMode=mode; clearInterval(pomoInterval); pomoRunning=false;
+  pomoTotal=pomoTimes[mode]; pomoLeft=pomoTotal;
+  document.querySelectorAll('.pomo-mode').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pomo-label-txt').textContent=pomoLabels[mode];
+  document.getElementById('pomo-play-btn').textContent='▶';
+  renderPomoTime();
+}
+function togglePomo() {
+  if(pomoRunning) {
+    clearInterval(pomoInterval); pomoRunning=false;
+    document.getElementById('pomo-play-btn').textContent='▶';
+  } else {
+    pomoRunning=true;
+    document.getElementById('pomo-play-btn').textContent='⏸';
+    pomoInterval=setInterval(()=>{
+      if(pomoLeft<=0) {
+        clearInterval(pomoInterval); pomoRunning=false;
+        document.getElementById('pomo-play-btn').textContent='▶';
+        if(pomoMode==='focus') { state.pomos++; localStorage.setItem('nx_pomos',state.pomos); updateStats(); pomoSession++; document.getElementById('pomo-session').textContent=pomoSession; document.getElementById('pomo-done').textContent=state.pomos; }
+        showToast(pomoMode==='focus'?'🍅 Pomodoro concluído! Hora de pausar!':'☕ Pausa finalizada! Hora de focar!');
+        return;
+      }
+      pomoLeft--;
+      renderPomoTime();
+    },1000);
+  }
+}
+function resetPomo() { clearInterval(pomoInterval); pomoRunning=false; pomoLeft=pomoTotal; document.getElementById('pomo-play-btn').textContent='▶'; renderPomoTime(); }
+function skipPomo() { pomoLeft=0; renderPomoTime(); }
+function renderPomoTime() {
+  const m=String(Math.floor(pomoLeft/60)).padStart(2,'0'), s=String(pomoLeft%60).padStart(2,'0');
+  document.getElementById('pomo-display').textContent=m+':'+s;
+  const circ=2*Math.PI*100;
+  const offset=circ*(1-pomoLeft/pomoTotal);
+  document.getElementById('pomo-ring').style.strokeDashoffset=offset;
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function loadProfile() {
+  const p=state.profile;
+  document.getElementById('profile-name-disp').textContent=p.name;
+  document.getElementById('profile-email-disp').textContent=p.email;
+  document.getElementById('profile-since').textContent=p.since;
+  document.getElementById('profile-name-input').value=p.name;
+  document.getElementById('profile-email-input').value=p.email;
+  document.getElementById('profile-initials').textContent=p.name.charAt(0).toUpperCase();
+  document.getElementById('settings-user-name').textContent=p.name;
+  if(p.avatar) {
+    document.getElementById('profile-img').src=p.avatar;
+    document.getElementById('profile-img').style.display='block';
+    document.getElementById('profile-initials').style.display='none';
+  }
+}
+function saveProfile() {
+  const name=document.getElementById('profile-name-input').value.trim()||'Usuário';
+  const email=document.getElementById('profile-email-input').value.trim()||'usuario@email.com';
+  const pass=document.getElementById('profile-pass-input').value;
+  const pass2=document.getElementById('profile-pass2-input').value;
+  if(pass && pass!==pass2) { showToast('❌ As senhas não coincidem!'); return; }
+  state.profile.name=name; state.profile.email=email;
+  if(!state.profile.since||state.profile.since==='hoje') state.profile.since=new Date().toLocaleDateString('pt-BR');
+  localStorage.setItem('nx_profile',JSON.stringify(state.profile));
+  loadProfile();
+  showToast('✅ Perfil salvo com sucesso!');
+}
+function triggerAvatarUpload() { document.getElementById('avatar-input').click(); }
+function handleAvatarUpload(event) {
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    state.profile.avatar=e.target.result;
+    localStorage.setItem('nx_profile',JSON.stringify(state.profile));
+    document.getElementById('profile-img').src=e.target.result;
+    document.getElementById('profile-img').style.display='block';
+    document.getElementById('profile-initials').style.display='none';
+    showToast('📸 Foto atualizada!');
+  };
+  reader.readAsDataURL(file);
+}
+function clearData() {
+  if(!confirm('Limpar todos os dados? (tarefas, notas, pomodoros)')) return;
+  localStorage.removeItem('nx_todos'); localStorage.removeItem('nx_notes'); localStorage.removeItem('nx_pomos');
+  state.todos=[]; state.notes=[]; state.pomos=0;
+  renderTodos(); renderNotes(); updateStats();
+  showToast('🗑️ Dados limpos!');
+}
+function deleteAccount() {
+  if(!confirm('Excluir conta? Todos os dados serão apagados!')) return;
+  localStorage.clear();
+  showToast('👋 Conta excluída. Até mais!');
+  setTimeout(()=>location.reload(),1500);
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function openSettings() { document.getElementById('settings-overlay').classList.add('open'); }
+function closeSettings() { document.getElementById('settings-overlay').classList.remove('open'); }
+function closeSettingsOutside(e) { if(e.target===document.getElementById('settings-overlay')) closeSettings(); }
+function setIconScale(v) { document.documentElement.style.setProperty('--icon-scale',v); }
+function setFontScale(v) { document.documentElement.style.setProperty('--font-scale',v); }
+function setFont(v) { document.documentElement.style.setProperty('--font',v); }
+function setTaskbarJustify(v) { document.documentElement.style.setProperty('--task-justify',v); }
+function setAccent(a,a2,el) {
+  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+  el.classList.add('active');
+  applyAccent(a,a2);
+  localStorage.setItem('nx_accent',a); localStorage.setItem('nx_accent2',a2);
+}
+function applyAccent(a,a2) {
+  document.documentElement.style.setProperty('--accent',a);
+  document.documentElement.style.setProperty('--accent2',a2);
+}
+function toggleEyeComfort() {
+  document.body.classList.toggle('eye-comfort');
+  state.eyeComfort=document.body.classList.contains('eye-comfort');
+  localStorage.setItem('nx_eye',state.eyeComfort?'1':'0');
+  showToast(state.eyeComfort?'🌙 Conforto ocular ativado':'☀️ Modo normal ativado');
+}
+
+// ============================================================
+// QUOTES
+// ============================================================
+const quotes = [
+  {t:'"A jornada de mil milhas começa com um único passo."',a:'— Lao Tzu'},
+  {t:'"O único modo de fazer um excelente trabalho é amar o que você faz."',a:'— Steve Jobs'},
+  {t:'"A criatividade é a inteligência se divertindo."',a:'— Albert Einstein'},
+  {t:'"Não é a espécie mais forte que sobrevive, mas aquela que melhor se adapta."',a:'— Charles Darwin'},
+  {t:'"O sucesso é a soma de pequenos esforços repetidos dia após dia."',a:'— Robert Collier'},
+  {t:'"Você não precisa ser ótimo para começar, mas precisa começar para ser ótimo."',a:'— Zig Ziglar'},
+  {t:'"O futuro pertence àqueles que acreditam na beleza de seus sonhos."',a:'— Eleanor Roosevelt'},
+  {t:'"A vida é o que acontece quando você está ocupado fazendo outros planos."',a:'— John Lennon'},
+];
+function newQuote() {
+  const q=quotes[Math.floor(Math.random()*quotes.length)];
+  document.getElementById('quote-text').textContent=q.t;
+  document.getElementById('quote-author').textContent=q.a;
+}
+
+// ============================================================
+// SYSTEM INFO
+// ============================================================
+function loadSystemInfo() {
+  const el = document.getElementById('battery-info');
+  let info = '';
+  const now = new Date();
+  info += `🕐 ${now.toLocaleTimeString('pt-BR')}<br>`;
+  info += `📅 ${now.toLocaleDateString('pt-BR')}<br>`;
+  info += `🌐 ${navigator.language || 'pt-BR'}<br>`;
+  info += `💻 ${navigator.platform || 'Web'}`;
+  if(navigator.getBattery) {
+    navigator.getBattery().then(b=>{
+      const pct = Math.round(b.level*100);
+      const icon = b.charging ? '🔌' : (pct>50?'🔋':pct>20?'🪫':'🔴');
+      el.innerHTML = info + `<br>${icon} Bateria: ${pct}%`;
+    }).catch(()=>{ el.innerHTML=info; });
+  } else { el.innerHTML = info; }
+  setInterval(()=>{
+    const n=new Date();
+    el.innerHTML=el.innerHTML.replace(/🕐 .*?<br>/,`🕐 ${n.toLocaleTimeString('pt-BR')}<br>`);
+  },1000);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  document.getElementById('stat-tasks').textContent = state.todos.filter(t=>!t.done).length;
+  document.getElementById('stat-notes').textContent = state.notes.length;
+  document.getElementById('stat-pomos').textContent = state.pomos;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// START
+init();
+</script>
+</body>
+</html>
