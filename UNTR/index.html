@@ -15,6 +15,7 @@
   --radius:14px;--radius2:22px;--shadow:0 8px 32px rgba(0,0,0,0.4);
   --font:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif;
   --taskbar-h:62px;--icon-scale:1;--font-scale:1;--task-justify:flex-start;
+  --modal-bg: rgba(10, 12, 20, 0.85);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#00000000;color:var(--text);font-family:var(--font);}
@@ -61,16 +62,19 @@ body.has-wallpaper #taskbar{background:rgba(5,7,18,0.85)!important;}
 #taskbar-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;justify-content:center;align-items:center;}
 #taskbar{height:76px;background:rgba(10, 15, 30, 0.8);backdrop-filter:blur(35px) saturate(180%);border:1px solid rgba(255,255,255,0.15);border-radius:32px;display:flex;align-items:center;padding:0 18px;gap:8px;justify-content:center;box-shadow:0 20px 50px rgba(0,0,0,0.5);position:relative;}
 #tb-goo-layer{position:absolute;inset:0;border-radius:32px;filter: url('#liquid-filter');z-index:0;pointer-events:none;}
-#tb-indicator{position:absolute;top:50%;transform:translateY(-50%);height:56px;background:linear-gradient(135deg, var(--accent), var(--accent2));border-radius:18px;transition:all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);box-shadow:0 0 40px rgba(108, 99, 255, 0.6), 0 0 80px rgba(78, 205, 196, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.15);filter: brightness(1.2) drop-shadow(0 0 15px rgba(108, 99, 255, 0.4));opacity:0.95!important;animation:indicatorPulse 2s ease-in-out infinite;}
-@keyframes indicatorPulse{0%,100%{box-shadow:0 0 40px rgba(108, 99, 255, 0.6), 0 0 80px rgba(78, 205, 196, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.15);}50%{box-shadow:0 0 50px rgba(108, 99, 255, 0.8), 0 0 100px rgba(78, 205, 196, 0.4), inset 0 0 25px rgba(255, 255, 255, 0.2);}}
+#tb-indicator{position:absolute;top:50%;transform:translateY(-50%);height:56px;background:var(--indicator-bg, linear-gradient(135deg,var(--accent),var(--accent2),#a78bfa));border-radius:22px;transition:left 0.5s cubic-bezier(0.34,1.56,0.64,1),width 0.5s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 28px rgba(108,99,255,0.75),0 0 56px rgba(78,205,196,0.45),0 0 90px rgba(108,99,255,0.3),inset 0 1px 0 rgba(255,255,255,0.35),inset 0 -1px 0 rgba(0,0,0,0.15);filter:brightness(1.18) saturate(1.4);opacity:1!important;animation:indicatorPulse 2.5s ease-in-out infinite,indicatorColorShift 4s ease-in-out infinite alternate;cursor:grab;}
+#tb-indicator.dragging-indicator{cursor:grabbing;transition:none!important;animation:indicatorPulse 2.5s ease-in-out infinite!important;}
+#tb-indicator.glass-mode { background: rgba(255,255,255,0.15)!important; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.2); animation: indicatorPulse 2.5s ease-in-out infinite; }
+#tb-indicator.jelly-active{animation:jelly 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards, indicatorPulse 2.5s ease-in-out 0.7s infinite, indicatorColorShift 4s ease-in-out infinite alternate!important;}
+@keyframes indicatorPulse{0%,100%{box-shadow:0 0 28px rgba(108,99,255,0.75),0 0 56px rgba(78,205,196,0.45),0 0 90px rgba(108,99,255,0.3),inset 0 1px 0 rgba(255,255,255,0.35);}50%{box-shadow:0 0 42px rgba(108,99,255,0.95),0 0 80px rgba(78,205,196,0.6),0 0 120px rgba(108,99,255,0.45),inset 0 1px 0 rgba(255,255,255,0.45);}}@keyframes indicatorColorShift{0%{background:linear-gradient(135deg,var(--accent),var(--accent2),#a78bfa);}50%{background:linear-gradient(135deg,var(--accent2),#a78bfa,var(--accent));}100%{background:linear-gradient(135deg,#a78bfa,var(--accent),var(--accent2));}}@keyframes jelly{0%{transform:translateY(-50%) scaleX(1) scaleY(1);}12%{transform:translateY(-50%) scaleX(1.22) scaleY(0.82);}28%{transform:translateY(-50%) scaleX(0.85) scaleY(1.15);}44%{transform:translateY(-50%) scaleX(1.1) scaleY(0.92);}58%{transform:translateY(-50%) scaleX(0.95) scaleY(1.05);}72%{transform:translateY(-50%) scaleX(1.04) scaleY(0.97);}86%{transform:translateY(-50%) scaleX(0.99) scaleY(1.01);}100%{transform:translateY(-50%) scaleX(1) scaleY(1);}}
 .tb-app{z-index:1;}
-.tb-app{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;border-radius:var(--radius);cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);border:1px solid transparent;position:relative;flex-shrink:0;}
-.tb-app:hover{background:rgba(255,255,255,0.08);transform:translateY(-8px) scale(calc(1.15 * var(--icon-scale)));}
+.tb-app{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;border-radius:var(--radius);cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);border:none!important;background:transparent!important;position:relative;flex-shrink:0;}
+.tb-app:hover{background:transparent!important;transform:translateY(-8px) scale(calc(1.15 * var(--icon-scale)));}
 .tb-app:active{transform:translateY(-2px) scale(0.95);}
-.tb-app.active{background:var(--surface);border-color:var(--accent);}
+.tb-app.active{background:transparent!important;border:none!important;box-shadow:none!important;}
 .tb-app .tb-icon{width:calc(32px * var(--icon-scale));height:calc(32px * var(--icon-scale));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:calc(18px * var(--icon-scale));transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);background:transparent!important;filter: brightness(1.1);}
 .tb-app:hover .tb-icon, .tb-app.active .tb-icon{filter: grayscale(0) brightness(1.2);transform:translateY(-2px);}
-.tb-app.active .tb-icon{background:var(--surface)!important;}
+.tb-app.active .tb-icon{background:transparent!important;}
 .tb-app .tb-label{font-size:calc(9px * var(--font-scale));color:#fff;font-weight: 700;white-space:nowrap;text-shadow: 0 2px 4px rgba(0,0,0,0.8);}
 .tb-dot{display:none;}
 .tb-divider{width:1px;height:28px;background:var(--border2);margin:0 2px;flex-shrink:0;}
@@ -78,38 +82,51 @@ body.has-wallpaper #taskbar{background:rgba(5,7,18,0.85)!important;}
 #clock-tb{font-family:var(--mono);font-size:calc(11px * var(--font-scale));color:var(--text2);white-space:nowrap;text-align:right;}
 
 /* ── PAGES ── */
-.page{position:fixed;inset:0;bottom:0;padding-bottom:calc(var(--taskbar-h) + 80px);overflow-y:auto;overflow-x:hidden;display:none;opacity:0;transform:translateX(35px) scale(0.96);filter:blur(6px);transition:all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);pointer-events:none;z-index:1;}
-.page.active{display:flex;flex-direction:column;opacity:1;transform:translateX(0) scale(1);filter:blur(0px);pointer-events:auto;z-index:2;}
-.page.exit{display:flex;flex-direction:column;opacity:0;transform:translateX(-35px) scale(0.96);filter:blur(6px);pointer-events:none;z-index:1;}
+.page{position:fixed;inset:0;bottom:0;padding-bottom:calc(var(--taskbar-h) + 80px);overflow-y:auto;overflow-x:hidden;display:none;opacity:0;transform:translateY(28px) scale(0.94);filter:blur(8px);transition:opacity 0.42s cubic-bezier(0.22,1,0.36,1),transform 0.42s cubic-bezier(0.34,1.56,0.64,1),filter 0.42s ease;pointer-events:none;z-index:1;}
+.page.active{display:flex;flex-direction:column;opacity:1;transform:translateY(0) scale(1);filter:blur(0px);pointer-events:auto;z-index:2;animation:pageEnter 0.42s cubic-bezier(0.34,1.56,0.64,1) forwards;}
+.page.exit{display:flex;flex-direction:column;opacity:0;transform:translateY(-20px) scale(0.96);filter:blur(6px);pointer-events:none;z-index:1;transition:opacity 0.3s ease,transform 0.3s ease,filter 0.3s ease;}
+@keyframes pageEnter{0%{opacity:0;transform:translateY(28px) scale(0.94);filter:blur(8px);}60%{opacity:1;filter:blur(0px);}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0px);}}
+#page-flash{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(108,99,255,0.18) 0%,transparent 70%);z-index:9998;pointer-events:none;opacity:0;transition:opacity 0.15s ease;}
+#page-flash.flash{opacity:1;}
+@keyframes flashIn{0%{opacity:0;}30%{opacity:1;}100%{opacity:0;}}
 
 /* ── PROFILE AS WINDOW ── */
-#page-profile {
+#page-profile, #page-themes {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -40%) scale(0.8);
-  width: 420px;
+  width: 480px;
   height: auto;
   max-height: 85vh;
-  background: rgba(15, 20, 35, 0.9);
-  backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(8, 10, 22, 0.96);
+  backdrop-filter: blur(50px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 28px;
   z-index: 2000;
   padding: 0;
   display: none;
   opacity: 0;
+  overflow: hidden;
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.06);
   pointer-events: auto;
 }
+#page-themes { width: 640px; max-height: 80vh; display: none; flex-direction: column; }
+#page-themes .app-content { overflow-y: auto; flex: 1; }
+#page-profile.active, #page-themes.active {
+  display: block;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+#page-themes.active { display: flex; }
 #page-profile.active {
   display: block;
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
 #page-profile .app-page-header { border-bottom: none; padding: 24px 28px 10px; }
-#page-profile .app-content { padding: 0 28px 32px; }
+#page-profile .app-content { padding: 0 28px 32px; overflow-y: auto; max-height: calc(85vh - 80px); }
 .profile-close { position: absolute; top: 20px; right: 20px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: none; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .profile-close:hover { background: rgba(255,255,255,0.1); color: #fff; transform: rotate(90deg); }
 .app-page-header{padding:20px 28px 12px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border2);flex-shrink:0;flex-wrap:wrap;}
@@ -140,9 +157,8 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
 
 /* ── HOME WIDGET CANVAS ── */
 #home-canvas{position:relative;width:100%;min-height:600px;flex:1;}
-.hw-tile{position:absolute;background:rgba(255,255,255,0.03);backdrop-filter:blur(40px) saturate(150%);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:0;overflow:hidden;cursor:default;user-select:none;transition:all 0.6s cubic-bezier(0.16, 1, 0.3, 1);box-shadow:0 10px 30px rgba(0,0,0,0.3);transform-style: preserve-3d;}
-.hw-tile:hover{transform:translateY(-12px) rotateX(2deg);border-color:rgba(255,255,255,0.2);box-shadow:0 30px 70px rgba(0,0,0,0.6);}
-.hw-tile:hover{border-color:rgba(255,255,255,0.14);box-shadow:0 8px 28px rgba(0,0,0,0.4);}
+.hw-tile{position:absolute;background:rgba(255,255,255,0.03);backdrop-filter:blur(40px) saturate(150%);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:0;overflow:hidden;cursor:default;user-select:none;transition:border-color 0.3s ease,box-shadow 0.3s ease;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.hw-tile:hover{border-color:rgba(255,255,255,0.18);box-shadow:0 12px 36px rgba(0,0,0,0.45);}
 .hw-tile.dragging-widget{opacity:0.85;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:999;border-color:var(--accent);}
 .hw-chrome{display:flex;align-items:center;gap:6px;padding:8px 10px 4px;border-bottom:1px solid rgba(255,255,255,0.06);}
 .hw-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;flex:1;}
@@ -416,9 +432,10 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
 .profile-form{display:flex;flex-direction:column;gap:11px;}
 
 /* ── SETTINGS ── */
-#settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
-#settings-overlay.open{display:flex;}
-#settings-panel{width:min(520px,92vw);max-height:82vh;overflow-y:auto;background:var(--bg3);border-radius:var(--radius2);border:1px solid var(--border);padding:24px;animation:modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1);position:relative;}
+#settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:2000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity 0.4s cubic-bezier(0.25,0.46,0.45,0.94);}
+#settings-overlay.open{opacity:1;pointer-events:auto;}
+#settings-panel{width:min(520px,92vw);max-height:82vh;overflow-y:auto;background:rgba(8,10,22,0.96);backdrop-filter:blur(50px) saturate(180%);border-radius:28px;border:1px solid rgba(255,255,255,0.18);padding:24px;position:relative;transform:translate(0,0) scale(0.82);opacity:0;transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 40px 100px rgba(0,0,0,0.75),0 0 0 1px rgba(255,255,255,0.06);}
+#settings-overlay.open #settings-panel{transform:translate(0,0) scale(1);opacity:1;}
 .settings-title{font-family:var(--display);font-size:17px;font-weight:700;margin-bottom:18px;}
 .settings-section{margin-bottom:18px;}
 .settings-section-title{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--border2);}
@@ -515,12 +532,12 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
 <!-- ═══ PAGES ═══ -->
 
 <!-- HOME -->
-<div class="page active" id="page-home">
+<div class="page" id="page-home">
   <div class="home-inner">
     <div class="home-header">
       <div class="logo-mark">N</div>
       <div><div class="site-name">NexOS</div><div class="site-tagline">Seu espaço digital pessoal</div></div>
-      <div class="home-meta"><div class="home-clock" id="home-clock">00:00:00</div><div class="home-date" id="home-date"></div></div>
+      <div class="home-meta"><div class="home-date" id="home-date" style="font-size:calc(12px * var(--font-scale));color:var(--text2)"></div></div>
       <div class="eye-toggle" onclick="toggleEyeComfort()" title="Conforto ocular"><span style="font-size:12px">🌙</span><div class="eye-toggle-dot"></div><span style="font-size:10px;color:var(--text2)">Conforto</span></div>
     </div>
     <div id="home-canvas"></div>
@@ -679,14 +696,15 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
   </div>
 </div>
 
-<!-- THEMES -->
-<div class="page" id="page-themes">
+<!-- THEMES AS WINDOW -->
+<div id="page-themes">
+  <button class="profile-close" onclick="closeThemes()">✕</button>
   <div class="app-page-header"><div class="app-page-icon" style="background:rgba(255,255,255,0.05)">🎨</div><div><div class="app-page-title">Temas de Fundo</div><div class="app-page-sub">Personalize seu espaço</div></div></div>
   <div class="app-content"><div class="themes-grid" id="themes-grid"></div></div>
 </div>
 
 <!-- PROFILE -->
-<div class="page" id="page-profile">
+<div id="page-profile">
   <button class="profile-close" onclick="closeProfile()">✕</button>
   <div class="app-page-header"><div class="app-page-icon icon-purple">👤</div><div><div class="app-page-title">Meu Perfil</div><div class="app-page-sub">Suas informações</div></div></div>
   <div class="app-content">
@@ -758,7 +776,9 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
       <div class="settings-row"><div><div class="settings-row-label">Ícones</div><div class="settings-row-sub">Tamanho na barra</div></div><input type="range" class="range-input" min="0.7" max="1.5" step="0.1" value="1" oninput="setIconScale(this.value)"></div>
       <div class="settings-row"><div><div class="settings-row-label">Fontes</div><div class="settings-row-sub">Tamanho geral</div></div><input type="range" class="range-input" min="0.8" max="1.3" step="0.05" value="1" oninput="setFontScale(this.value)"></div>
       <div class="settings-row"><div><div class="settings-row-label">Fonte</div></div><select class="font-select" onchange="setFont(this.value)"><option value="'Space Grotesk',sans-serif">Space Grotesk</option><option value="'Syne',sans-serif">Syne</option><option value="'JetBrains Mono',monospace">JetBrains Mono</option><option value="Georgia,serif">Georgia</option></select></div>
-      <div class="settings-row"><div><div class="settings-row-label">Cor de destaque</div></div><div class="color-row"><div class="color-dot active" style="background:#6c63ff" onclick="setAccent('#6c63ff','#4ecdc4',this)"></div><div class="color-dot" style="background:#ff6b9d" onclick="setAccent('#ff6b9d','#ff9f7f',this)"></div><div class="color-dot" style="background:#4ecdc4" onclick="setAccent('#4ecdc4','#6c63ff',this)"></div><div class="color-dot" style="background:#64a0ff" onclick="setAccent('#64a0ff','#7b61ff',this)"></div><div class="color-dot" style="background:#64dc82" onclick="setAccent('#64dc82','#4ecdc4',this)"></div><div class="color-dot" style="background:#ffbe4d" onclick="setAccent('#ffbe4d','#ff9f7f',this)"></div><div class="color-dot" id="custom-accent-dot" style="background:linear-gradient(45deg,red,orange,yellow,green,blue,indigo,violet);border:1px solid rgba(255,255,255,0.3)" title="Cor personalizada" onclick="document.getElementById('custom-accent-picker').click()"></div><input type="color" id="custom-accent-picker" style="display:none" onchange="setCustomAccent(this.value)"></div></div>
+      <div class="settings-row"><div><div class="settings-row-label">Cor Principal</div><div class="settings-row-sub">Cor de destaque</div></div><input type="color" id="accent-color-pick" value="#6c63ff" oninput="applyAccent(this.value, state.accent2Color)" style="width:36px;height:28px;border:none;border-radius:8px;cursor:pointer;background:none"></div>
+      <div class="settings-row"><div><div class="settings-row-label">Cor Secundária</div><div class="settings-row-sub">Segunda cor de destaque</div></div><input type="color" id="accent2-color-pick" value="#4ecdc4" oninput="applyAccent(state.accentColor, this.value)" style="width:36px;height:28px;border:none;border-radius:8px;cursor:pointer;background:none"></div>
+      <div class="settings-row"><div><div class="settings-row-label">Cor do Balão</div></div><div class="color-row"><div class="color-dot active" style="background:#6c63ff" title="blue" onclick="setIndicatorColor('blue',this)"></div><div class="color-dot" style="background:#64dc82" title="green" onclick="setIndicatorColor('green',this)"></div><div class="color-dot" style="background:#ff6b9d" title="red" onclick="setIndicatorColor('red',this)"></div><div class="color-dot" style="background:#ffbe4d" title="yellow" onclick="setIndicatorColor('yellow',this)"></div><div class="color-dot" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4)" title="glass" onclick="setIndicatorColor('glass',this)"></div></div></div>
     </div>
     <div class="settings-section">
       <div class="settings-section-title">Barra de Tarefas</div>
@@ -774,7 +794,8 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
     </div>
     <div class="settings-section">
       <div class="settings-section-title">Widgets — Gerenciar</div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Clique para adicionar ou remover widgets da tela inicial. Widgets ativos têm borda colorida.</div>
+      <div class="settings-row"><div><div class="settings-row-label">Organizar em Grade</div><div class="settings-row-sub">Alinhamento automático</div></div><div class="eye-toggle" onclick="toggleGrid()"><div class="eye-toggle-dot" id="grid-toggle-dot"></div></div></div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;margin-top:12px">Clique para adicionar ou remover widgets da tela inicial.</div>
       <div class="widget-catalog" id="widget-catalog"></div>
     </div>
     <div class="settings-section">
@@ -823,6 +844,7 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="page-flash"></div>
 
 <script>
 // ============================================================
@@ -835,7 +857,13 @@ let state = {
   accentColor:'#6c63ff', accent2Color:'#4ecdc4', wallpaper:'',
   habits:[], mood:'', finance:[], water:0, countdownTarget:'',
   deviceType:'',
-  homeWidgets:[] // [{id, type, x, y, w, h}]
+  gridEnabled: false,
+  indicatorColor: 'blue',
+  homeWidgets: [], // [{id, type, x, y, w, h}]
+  iconScale: '1',
+  fontScale: '1',
+  fontFamily: "'Space Grotesk',sans-serif",
+  taskbarJustify: 'flex-start'
 };
 
 // Cross-device: store accounts globally (not user-specific)
@@ -1047,7 +1075,13 @@ function saveAll(){
   lsSet('water',String(state.water));
   lsSet('countdownTarget',state.countdownTarget);
   lsSet('deviceType',state.deviceType);
+  lsSet('gridEnabled',state.gridEnabled?'1':'0');
+  lsSet('indicatorColor',state.indicatorColor);
   lsSet('homeWidgets',JSON.stringify(state.homeWidgets));
+  lsSet('iconScale',state.iconScale);
+  lsSet('fontScale',state.fontScale);
+  lsSet('fontFamily',state.fontFamily);
+  lsSet('taskbarJustify',state.taskbarJustify);
   showToast('💾 Salvo!');
 }
 function loadUserState(){
@@ -1066,7 +1100,13 @@ function loadUserState(){
   state.water=parseInt(ls('water')||'0');
   state.countdownTarget=ls('countdownTarget')||'';
   state.deviceType=ls('deviceType')||'';
+  state.gridEnabled=ls('gridEnabled')==='1';
+  state.indicatorColor=ls('indicatorColor')||'blue';
   state.homeWidgets=JSON.parse(ls('homeWidgets')||'[]');
+  state.iconScale=ls('iconScale')||'1';
+  state.fontScale=ls('fontScale')||'1';
+  state.fontFamily=ls('fontFamily')||"'Space Grotesk',sans-serif";
+  state.taskbarJustify=ls('taskbarJustify')||'flex-start';
 }
 window.addEventListener('beforeunload',saveAll);
 setInterval(saveAll,120000);
@@ -1084,6 +1124,35 @@ function init(){
   loadWeather();
   initConverter();
   initPomodoro();
+  applyIndicatorColor();
+  // Apply saved appearance settings
+  document.documentElement.style.setProperty('--icon-scale', state.iconScale);
+  document.documentElement.style.setProperty('--font-scale', state.fontScale);
+  document.documentElement.style.setProperty('--font', state.fontFamily);
+  document.documentElement.style.setProperty('--task-justify', state.taskbarJustify);
+  // Hydrate settings UI controls
+  const iconRange = document.querySelector('#settings-panel input[oninput*="setIconScale"]');
+  if(iconRange) iconRange.value = state.iconScale;
+  const fontRange = document.querySelector('#settings-panel input[oninput*="setFontScale"]');
+  if(fontRange) fontRange.value = state.fontScale;
+  const fontSel = document.querySelector('#settings-panel select[onchange*="setFont"]');
+  if(fontSel) fontSel.value = state.fontFamily;
+  const taskSel = document.querySelector('#settings-panel select[onchange*="setTaskbarJustify"]');
+  if(taskSel) taskSel.value = state.taskbarJustify;
+  // Hydrate accent color pickers
+  const p1 = document.getElementById('accent-color-pick');
+  const p2 = document.getElementById('accent2-color-pick');
+  if(p1) p1.value = state.accentColor;
+  if(p2) p2.value = state.accent2Color;
+  // Hydrate indicator color dots
+  document.querySelectorAll('.color-dot').forEach(d=>{
+    d.classList.toggle('active', d.getAttribute('title')===state.indicatorColor);
+  });
+  if(state.gridEnabled){
+    const dot = document.getElementById('grid-toggle-dot');
+    if(dot) dot.parentElement.classList.add('active');
+  }
+  buildThemesGrid();
   loadProfile();
   newQuote();
   updateStats();
@@ -1096,7 +1165,13 @@ function init(){
   buildWidgetCatalog();
   updateDeviceSettingsUI(state.deviceType);
   const d=document.getElementById('pomo-done'); if(d) d.textContent=state.pomos;
+  // Set home as active page
+  const homePage = document.getElementById('page-home');
+  if(homePage) homePage.classList.add('active');
+  const homeBtn = document.getElementById('tb-home');
+  if(homeBtn) homeBtn.classList.add('active');
   setTimeout(updateIndicator, 500);
+  setTimeout(initDraggableIndicator, 600);
   window.addEventListener('resize', updateIndicator);
 }
 
@@ -1106,7 +1181,6 @@ function init(){
 function updateClock(){
   const now=new Date();
   const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  const hc=document.getElementById('home-clock'); if(hc) hc.textContent=t;
   const ctb=document.getElementById('clock-tb'); if(ctb) ctb.textContent=t;
   const days=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
   const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1205,7 +1279,15 @@ function setupWidgetDrag(tile, cfg){
     function onMove(ev){
       if(!moving) return;
       const dx=ev.clientX-startX, dy=ev.clientY-startY;
-      cfg.x=Math.max(0,startLeft+dx); cfg.y=Math.max(0,startTop+dy);
+      let nx = startLeft + dx;
+      let ny = startTop + dy;
+      
+      if(state.gridEnabled){
+        nx = Math.round(nx / 20) * 20;
+        ny = Math.round(ny / 20) * 20;
+      }
+      
+      cfg.x=Math.max(0,nx); cfg.y=Math.max(0,ny);
       tile.style.left=cfg.x+'px'; tile.style.top=cfg.y+'px';
       updateCanvasHeight();
     }
@@ -1250,8 +1332,16 @@ function setupWidgetResize(tile, cfg){
     e.preventDefault(); e.stopPropagation();
     const startX=e.clientX, startY=e.clientY, startW=cfg.w, startH=cfg.h;
     function onMove(ev){
-      cfg.w=Math.max(140,startW+(ev.clientX-startX));
-      cfg.h=Math.max(100,startH+(ev.clientY-startY));
+      let nw = startW + (ev.clientX - startX);
+      let nh = startH + (ev.clientY - startY);
+      
+      if(state.gridEnabled){
+        nw = Math.round(nw / 20) * 20;
+        nh = Math.round(nh / 20) * 20;
+      }
+      
+      cfg.w=Math.max(140,nw);
+      cfg.h=Math.max(100,nh);
       tile.style.width=cfg.w+'px'; tile.style.height=cfg.h+'px';
       updateCanvasHeight();
     }
@@ -1309,6 +1399,13 @@ function buildWidgetCatalog(){
       <div class="wcat-name">${def.name}</div>
       ${activeTypes.has(def.type)?'<div style="font-size:9px;color:var(--accent);margin-top:2px">✓ Ativo</div>':'<div style="font-size:9px;color:var(--text3);margin-top:2px">+ Adicionar</div>'}
     </div>`).join('');
+  
+  // Atualizar seleção de cores do balão
+  document.querySelectorAll('#settings-panel .color-dot').forEach(dot => {
+    dot.classList.remove('active');
+    const title = dot.getAttribute('title')?.toLowerCase();
+    if(title === state.indicatorColor) dot.classList.add('active');
+  });
 }
 
 function toggleWidgetFromCatalog(type){
@@ -1642,17 +1739,141 @@ function updateIndicator(){
   if(activeBtn && indicator){
     const rect = activeBtn.getBoundingClientRect();
     const tbRect = document.getElementById('taskbar').getBoundingClientRect();
-    
     indicator.style.width = rect.width + 'px';
     indicator.style.left = (rect.left - tbRect.left) + 'px';
     indicator.style.opacity = '1';
-    
-    // Efeito de "esticar" (elastic) na transição
-    indicator.style.transform = 'translateY(-50%) scaleX(1.2)';
-    setTimeout(() => {
-      indicator.style.transform = 'translateY(-50%) scaleX(1)';
-    }, 250);
+    indicator.classList.remove('jelly-active');
+    void indicator.offsetWidth;
+    indicator.classList.add('jelly-active');
+    setTimeout(() => { indicator.classList.remove('jelly-active'); }, 700);
   }
+}
+
+// ── DRAGGABLE INDICATOR (Balão deslizante) ──
+function initDraggableIndicator(){
+  const indicator = document.getElementById('tb-indicator');
+  const taskbar = document.getElementById('taskbar');
+  if(!indicator || !taskbar) return;
+  let isDragging = false;
+  let startX = 0;
+  let startLeft = 0;
+
+  indicator.addEventListener('mousedown', function(e){
+    isDragging = true;
+    startX = e.clientX;
+    startLeft = parseFloat(indicator.style.left) || 0;
+    indicator.classList.add('dragging-indicator');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e){
+    if(!isDragging) return;
+    const tbRect = taskbar.getBoundingClientRect();
+    const indW = parseFloat(indicator.style.width) || 60;
+    const dx = e.clientX - startX;
+    let newLeft = startLeft + dx;
+    // Clamp inside taskbar bounds (with padding)
+    const minLeft = 0;
+    const maxLeft = tbRect.width - indW;
+    newLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+    indicator.style.left = newLeft + 'px';
+    // Highlight the app button currently under the indicator center
+    const indCenterX = tbRect.left + newLeft + indW / 2;
+    document.querySelectorAll('.tb-app').forEach(btn=>{
+      const r = btn.getBoundingClientRect();
+      btn.style.opacity = (indCenterX >= r.left && indCenterX <= r.right) ? '1' : '0.55';
+    });
+  });
+
+  document.addEventListener('mouseup', function(e){
+    if(!isDragging) return;
+    isDragging = false;
+    indicator.classList.remove('dragging-indicator');
+    // Restore opacity
+    document.querySelectorAll('.tb-app').forEach(btn=>{ btn.style.opacity = ''; });
+    // Find which app button the indicator center is over
+    const tbRect = taskbar.getBoundingClientRect();
+    const indW = parseFloat(indicator.style.width) || 60;
+    const indLeft = parseFloat(indicator.style.left) || 0;
+    const indCenterX = tbRect.left + indLeft + indW / 2;
+    let bestBtn = null, bestDist = Infinity;
+    document.querySelectorAll('.tb-app[id^="tb-"]').forEach(btn=>{
+      const r = btn.getBoundingClientRect();
+      const btnCX = r.left + r.width / 2;
+      const dist = Math.abs(indCenterX - btnCX);
+      if(dist < bestDist){ bestDist = dist; bestBtn = btn; }
+    });
+    if(bestBtn){
+      const pageId = bestBtn.id.replace('tb-', '');
+      switchPage(pageId);
+    } else {
+      updateIndicator();
+    }
+  });
+
+  // Touch support
+  indicator.addEventListener('touchstart', function(e){
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startLeft = parseFloat(indicator.style.left) || 0;
+    indicator.classList.add('dragging-indicator');
+    e.preventDefault();
+  }, {passive:false});
+
+  document.addEventListener('touchmove', function(e){
+    if(!isDragging) return;
+    const tbRect = taskbar.getBoundingClientRect();
+    const indW = parseFloat(indicator.style.width) || 60;
+    const dx = e.touches[0].clientX - startX;
+    let newLeft = startLeft + dx;
+    const minLeft = 0;
+    const maxLeft = tbRect.width - indW;
+    newLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+    indicator.style.left = newLeft + 'px';
+    e.preventDefault();
+  }, {passive:false});
+
+  document.addEventListener('touchend', function(e){
+    if(!isDragging) return;
+    isDragging = false;
+    indicator.classList.remove('dragging-indicator');
+    document.querySelectorAll('.tb-app').forEach(btn=>{ btn.style.opacity = ''; });
+    const tbRect = taskbar.getBoundingClientRect();
+    const indW = parseFloat(indicator.style.width) || 60;
+    const indLeft = parseFloat(indicator.style.left) || 0;
+    const indCenterX = tbRect.left + indLeft + indW / 2;
+    let bestBtn = null, bestDist = Infinity;
+    document.querySelectorAll('.tb-app[id^="tb-"]').forEach(btn=>{
+      const r = btn.getBoundingClientRect();
+      const btnCX = r.left + r.width / 2;
+      const dist = Math.abs(indCenterX - btnCX);
+      if(dist < bestDist){ bestDist = dist; bestBtn = btn; }
+    });
+    if(bestBtn){
+      const pageId = bestBtn.id.replace('tb-', '');
+      switchPage(pageId);
+    } else {
+      updateIndicator();
+    }
+  });
+}
+
+function showModalOverlay(){
+  let ov = document.getElementById('modal-page-overlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'modal-page-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);z-index:1999;opacity:0;transition:opacity 0.3s ease;pointer-events:none;display:none;';
+    ov.addEventListener('click', ()=>{ closeProfile(); closeThemes(); });
+    document.body.appendChild(ov);
+  }
+  ov.style.display = 'block';
+  ov.style.pointerEvents = 'auto';
+  setTimeout(()=>{ ov.style.opacity='1'; }, 10);
+}
+function hideModalOverlay(){
+  const ov = document.getElementById('modal-page-overlay');
+  if(ov){ ov.style.opacity='0'; ov.style.pointerEvents='none'; setTimeout(()=>{ ov.style.display='none'; }, 300); }
 }
 
 function switchPage(id){
@@ -1661,22 +1882,34 @@ function switchPage(id){
   const tb = document.getElementById('tb-'+id);
   
   if(id === 'profile'){
-    if(newPage.classList.contains('active')) return;
-    if (state.user) {
-      const pName = document.getElementById('profile-name-disp');
-      const pAvatar = document.getElementById('profile-initials');
-      if (pName) pName.textContent = state.user;
-      if (pAvatar) pAvatar.textContent = state.user.charAt(0).toUpperCase();
-    }
-    newPage.style.display = 'block';
-    setTimeout(() => newPage.classList.add('active'), 10);
+    const profilePage = document.getElementById('page-profile');
+    if(profilePage.classList.contains('active')) return;
+    showModalOverlay();
+    profilePage.style.display = 'block';
+    setTimeout(() => profilePage.classList.add('active'), 10);
+    document.querySelectorAll('.tb-app').forEach(b=>b.classList.remove('active'));
+    if(tb) tb.classList.add('active');
+    updateIndicator();
+    return;
+  }
+  
+  if(id === 'themes'){
+    const themesPage = document.getElementById('page-themes');
+    if(themesPage.classList.contains('active')) return;
+    showModalOverlay();
+    themesPage.style.display = 'flex';
+    setTimeout(() => themesPage.classList.add('active'), 10);
+    buildThemesGrid();
+    document.querySelectorAll('.tb-app').forEach(b=>b.classList.remove('active'));
+    if(tb) tb.classList.add('active');
+    updateIndicator();
     return;
   }
 
-  if(oldPage && (oldPage.id === 'page-profile' || oldPage.id === 'settings-panel')){
-    closeProfile();
-    if(id === 'home') return;
-  }
+  closeProfile();
+  closeThemes();
+  hideModalOverlay();
+  closeSettings();
 
   if(oldPage && oldPage.id === 'page-'+id) return;
   
@@ -1685,20 +1918,23 @@ function switchPage(id){
   
   updateIndicator();
 
-  if(oldPage && oldPage.id !== 'page-profile' && oldPage.id !== 'settings-panel'){
+  if(oldPage && oldPage.id !== 'page-profile' && oldPage.id !== 'page-themes' && oldPage.id !== 'settings-panel'){
     oldPage.classList.add('exit');
     oldPage.classList.remove('active');
     setTimeout(() => {
       oldPage.classList.remove('exit');
       oldPage.style.display = 'none';
-    }, 400);
+    }, 350);
   }
   
   if(newPage){
-    newPage.style.display = (id === 'profile') ? 'block' : 'flex';
+    newPage.style.display = 'flex';
     void newPage.offsetWidth;
     newPage.classList.add('active');
   }
+  // Flash effect
+  const flash = document.getElementById('page-flash');
+  if(flash){ flash.classList.add('flash'); setTimeout(()=>flash.classList.remove('flash'), 200); }
 
   updateStats();
   if(id==='calendar') buildFullCalendar();
@@ -2027,13 +2263,14 @@ const WALLPAPERS=[
 function buildThemesGrid(){
   const grid=document.getElementById('themes-grid');if(!grid) return;
   let html=`<div class="theme-thumb theme-none ${!state.wallpaper?'active':''}" onclick="applyWallpaper('')" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;font-size:11px;cursor:pointer;border:3px solid ${!state.wallpaper?'var(--accent)':'transparent'}"><span style="font-size:22px">🚫</span>Sem fundo</div>`;
-  WALLPAPERS.forEach(w=>{html+=`<div class="theme-thumb ${state.wallpaper===w.file?'active':''}" onclick="applyWallpaper('${w.file}')"><img src="${w.file}" alt="${w.name}" loading="lazy" onerror="this.parentElement.style.display='none'"><div class="theme-name">${w.name}</div></div>`;});
+  WALLPAPERS.forEach(w=>{html+=`<div class="theme-thumb ${state.wallpaper===w.file?'active':''}" onclick="applyWallpaper('${w.file}')" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)"><img src="${w.file}" alt="${w.name}" loading="lazy" onerror="this.style.display='none'"><div class="theme-name">${w.name}</div></div>`;});
   grid.innerHTML=html;
 }
 function applyWallpaper(file){
   state.wallpaper=file;
   if(file){document.body.style.backgroundImage=`url('${file}')`;document.body.classList.add('has-wallpaper');}
   else{document.body.style.backgroundImage='';document.body.classList.remove('has-wallpaper');}
+  lsSet('wallpaper',file);
   buildThemesGrid();showToast(file?'🎨 Tema aplicado!':'🎨 Fundo removido');
 }
 
@@ -2042,24 +2279,14 @@ function applyWallpaper(file){
 // ============================================================
 function closeProfile() {
   const profile = document.getElementById('page-profile');
-  if (profile) {
+  if (profile && profile.classList.contains('active')) {
     profile.classList.remove('active');
     setTimeout(() => { profile.style.display = 'none'; }, 500);
+    hideModalOverlay();
   }
 }
 
-// Fechar perfil ao clicar fora
-document.addEventListener('mousedown', (e) => {
-  const profile = document.getElementById('page-profile');
-  if (profile && profile.classList.contains('active')) {
-    if (!profile.contains(e.target)) {
-      const tbApps = document.querySelectorAll('.tb-app');
-      let clickedOnApp = false;
-      tbApps.forEach(app => { if (app.contains(e.target)) clickedOnApp = true; });
-      if (!clickedOnApp) closeProfile();
-    }
-  }
-});
+// Fechar perfil ao clicar fora é tratado pelo modal-page-overlay
 
 function loadProfile(){
   const p=state.profile;
@@ -2078,17 +2305,81 @@ function clearData(){if(!confirm('Limpar todos os dados?')) return;state.todos=[
 // ============================================================
 // SETTINGS
 // ============================================================
-function openSettings(){document.getElementById('settings-overlay').classList.add('open');buildWidgetCatalog();}
-function closeSettings(){document.getElementById('settings-overlay').classList.remove('open');}
+function openSettings(){
+  const overlay = document.getElementById('settings-overlay');
+  overlay.classList.add('open');
+  buildWidgetCatalog();
+}
+function closeSettings(){
+  const overlay = document.getElementById('settings-overlay');
+  overlay.classList.remove('open');
+}
 function closeSettingsOutside(e){if(e.target===document.getElementById('settings-overlay')) closeSettings();}
-function setIconScale(v){document.documentElement.style.setProperty('--icon-scale',v);}
-function setFontScale(v){document.documentElement.style.setProperty('--font-scale',v);}
-function setFont(v){document.documentElement.style.setProperty('--font',v);}
-function setTaskbarJustify(v){document.documentElement.style.setProperty('--task-justify',v);}
-function setAccent(a,a2,el){document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));el.classList.add('active');applyAccent(a,a2);state.accentColor=a;state.accent2Color=a2;}
-function setCustomAccent(color){const dot=document.getElementById('custom-accent-dot');document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));dot.classList.add('active');dot.style.background=color;applyAccent(color,color);state.accentColor=color;state.accent2Color=color;}
-function applyAccent(a,a2){document.documentElement.style.setProperty('--accent',a);document.documentElement.style.setProperty('--accent2',a2);}
-function toggleEyeComfort(){document.body.classList.toggle('eye-comfort');state.eyeComfort=document.body.classList.contains('eye-comfort');showToast(state.eyeComfort?'🌙 Conforto ocular':'☀️ Modo normal');}
+function setIconScale(v){document.documentElement.style.setProperty('--icon-scale',v);state.iconScale=String(v);lsSet('iconScale',String(v));}
+function setFontScale(v){document.documentElement.style.setProperty('--font-scale',v);state.fontScale=String(v);lsSet('fontScale',String(v));}
+function setFont(v){document.documentElement.style.setProperty('--font',v);state.fontFamily=v;lsSet('fontFamily',v);}
+function setTaskbarJustify(v){document.documentElement.style.setProperty('--task-justify',v);state.taskbarJustify=v;lsSet('taskbarJustify',v);}
+function applyAccent(c1, c2){
+  state.accentColor = c1;
+  state.accent2Color = c2;
+  document.documentElement.style.setProperty('--accent', c1);
+  document.documentElement.style.setProperty('--accent2', c2);
+  lsSet('accent', c1);
+  lsSet('accent2', c2);
+  // Update color pickers UI
+  const p1 = document.getElementById('accent-color-pick');
+  const p2 = document.getElementById('accent2-color-pick');
+  if(p1) p1.value = c1;
+  if(p2) p2.value = c2;
+}
+function setIndicatorColor(type, el){
+  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+  if(el) el.classList.add('active');
+  state.indicatorColor = type;
+  lsSet('indicatorColor', type);
+  applyIndicatorColor();
+}
+function applyIndicatorColor(){
+  const ind = document.getElementById('tb-indicator');
+  if(!ind) return;
+  ind.classList.remove('glass-mode');
+  let bg = '';
+  switch(state.indicatorColor){
+    case 'blue': bg = 'linear-gradient(135deg,#6c63ff,#4ecdc4,#a78bfa)'; break;
+    case 'green': bg = 'linear-gradient(135deg,#64dc82,#4ecdc4,#a8c47a)'; break;
+    case 'red': bg = 'linear-gradient(135deg,#ff6b9d,#ff9f7f,#ff6b6b)'; break;
+    case 'yellow': bg = 'linear-gradient(135deg,#ffbe4d,#ff9f7f,#f6e05e)'; break;
+    case 'glass': ind.classList.add('glass-mode'); break;
+  }
+  if(state.indicatorColor !== 'glass') ind.style.setProperty('--indicator-bg', bg);
+  else ind.style.removeProperty('--indicator-bg');
+}
+function toggleGrid(){
+  state.gridEnabled = !state.gridEnabled;
+  lsSet('gridEnabled', state.gridEnabled?'1':'0');
+  const dot = document.getElementById('grid-toggle-dot');
+  if(dot) dot.parentElement.classList.toggle('active', state.gridEnabled);
+  if(state.gridEnabled){
+    state.homeWidgets.forEach(w => {
+      w.x = Math.round(w.x / 20) * 20;
+      w.y = Math.round(w.y / 20) * 20;
+    });
+    buildHomeCanvas();
+  }
+  showToast(state.gridEnabled ? '📏 Grade ativada' : '📏 Grade desativada');
+}
+function closeThemes() {
+  const themes = document.getElementById('page-themes');
+  if (themes && themes.classList.contains('active')) {
+    themes.classList.remove('active');
+    setTimeout(() => { themes.style.display = 'none'; }, 500);
+    hideModalOverlay();
+  }
+}
+function closeSettingsOutside(e){
+  if(e.target===document.getElementById('settings-overlay')) closeSettings();
+}
+function toggleEyeComfort(){document.body.classList.toggle('eye-comfort');state.eyeComfort=document.body.classList.contains('eye-comfort');lsSet('eye',state.eyeComfort?'1':'0');showToast(state.eyeComfort?'🌙 Conforto ocular':'☀️ Modo normal');}
 
 // ============================================================
 // QUOTES
