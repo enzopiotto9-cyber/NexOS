@@ -61,7 +61,8 @@ body.has-wallpaper #taskbar{background:rgba(5,7,18,0.85)!important;}
 #taskbar-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;justify-content:center;align-items:center;}
 #taskbar{height:76px;background:rgba(10, 15, 30, 0.8);backdrop-filter:blur(35px) saturate(180%);border:1px solid rgba(255,255,255,0.15);border-radius:32px;display:flex;align-items:center;padding:0 18px;gap:8px;justify-content:center;box-shadow:0 20px 50px rgba(0,0,0,0.5);position:relative;}
 #tb-goo-layer{position:absolute;inset:0;border-radius:32px;filter: url('#liquid-filter');z-index:0;pointer-events:none;}
-#tb-indicator{position:absolute;top:50%;transform:translateY(-50%);height:56px;background:var(--accent);border-radius:18px;transition:all 0.6s cubic-bezier(0.23, 1, 0.32, 1);box-shadow:0 0 25px var(--accent);filter: brightness(1.2);opacity:0.6!important;}
+#tb-indicator{position:absolute;top:50%;transform:translateY(-50%);height:56px;background:linear-gradient(135deg, var(--accent), var(--accent2));border-radius:18px;transition:all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);box-shadow:0 0 40px rgba(108, 99, 255, 0.6), 0 0 80px rgba(78, 205, 196, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.15);filter: brightness(1.2) drop-shadow(0 0 15px rgba(108, 99, 255, 0.4));opacity:0.95!important;animation:indicatorPulse 2s ease-in-out infinite;}
+@keyframes indicatorPulse{0%,100%{box-shadow:0 0 40px rgba(108, 99, 255, 0.6), 0 0 80px rgba(78, 205, 196, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.15);}50%{box-shadow:0 0 50px rgba(108, 99, 255, 0.8), 0 0 100px rgba(78, 205, 196, 0.4), inset 0 0 25px rgba(255, 255, 255, 0.2);}}
 .tb-app{z-index:1;}
 .tb-app{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 8px;border-radius:var(--radius);cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);border:1px solid transparent;position:relative;flex-shrink:0;}
 .tb-app:hover{background:rgba(255,255,255,0.08);transform:translateY(-8px) scale(calc(1.15 * var(--icon-scale)));}
@@ -77,9 +78,9 @@ body.has-wallpaper #taskbar{background:rgba(5,7,18,0.85)!important;}
 #clock-tb{font-family:var(--mono);font-size:calc(11px * var(--font-scale));color:var(--text2);white-space:nowrap;text-align:right;}
 
 /* ── PAGES ── */
-.page{position:fixed;inset:0;bottom:0;padding-bottom:calc(var(--taskbar-h) + 80px);overflow-y:auto;overflow-x:hidden;display:none;opacity:0;transform:scale(0.8) translateY(100px);filter:blur(30px) brightness(0.3);transition:all 0.9s cubic-bezier(0.22, 1, 0.36, 1);pointer-events:none;z-index:1;}
-.page.active{display:flex;flex-direction:column;opacity:1;transform:scale(1) translateY(0);filter:blur(0px) brightness(1);pointer-events:auto;z-index:2;}
-.page.exit{display:flex;flex-direction:column;opacity:0;transform:scale(1.2) translateY(-100px);filter:blur(40px) brightness(2);pointer-events:none;z-index:1;}
+.page{position:fixed;inset:0;bottom:0;padding-bottom:calc(var(--taskbar-h) + 80px);overflow-y:auto;overflow-x:hidden;display:none;opacity:0;transform:translateX(35px) scale(0.96);filter:blur(6px);transition:all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);pointer-events:none;z-index:1;}
+.page.active{display:flex;flex-direction:column;opacity:1;transform:translateX(0) scale(1);filter:blur(0px);pointer-events:auto;z-index:2;}
+.page.exit{display:flex;flex-direction:column;opacity:0;transform:translateX(-35px) scale(0.96);filter:blur(6px);pointer-events:none;z-index:1;}
 
 /* ── PROFILE AS WINDOW ── */
 #page-profile {
@@ -311,7 +312,7 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
 .note-card-body{font-size:10px;color:var(--text2);line-height:1.4;}
 .note-card-date{font-size:9px;color:var(--text3);margin-top:7px;}
 .note-title-input{font-size:18px;font-family:var(--display);font-weight:700;background:none;border:none;color:var(--text);outline:none;margin-bottom:9px;width:100%;}
-.note-body-input{flex:1;background:none;border:none;color:var(--text2);outline:none;font-size:13px;font-family:var(--font);line-height:1.8;resize:none;width:100%;min-height:280px;}
+.note-body-input{flex:1;background:rgba(0,0,0,0.75);border:1px solid rgba(108,99,255,0.3);border-radius:8px;color:var(--text);outline:none;font-size:13px;font-family:var(--font);line-height:1.8;resize:none;width:100%;min-height:280px;padding:12px;backdrop-filter:blur(10px);}
 
 /* ── WEATHER ── */
 #page-weather{background:var(--bg2);}
@@ -686,7 +687,7 @@ body.eye-comfort{--bg:#0e0c07;--bg2:#16130a;--bg3:#1e1a0f;--bg4:#25200f;--surfac
 
 <!-- PROFILE -->
 <div class="page" id="page-profile">
-  <button class="profile-close" onclick="switchPage('home')">✕</button>
+  <button class="profile-close" onclick="closeProfile()">✕</button>
   <div class="app-page-header"><div class="app-page-icon icon-purple">👤</div><div><div class="app-page-title">Meu Perfil</div><div class="app-page-sub">Suas informações</div></div></div>
   <div class="app-content">
     <div class="profile-wrap">
@@ -873,6 +874,17 @@ function switchLoginTab(t){
   document.getElementById('recovery-form').style.display='none';
   document.getElementById('username-recovery-form').style.display='none';
   document.getElementById('login-error').textContent='';
+}
+
+function doSignup() {
+  const user = document.getElementById('reg-user')?.value.trim();
+  if (!user) { showToast('⚠️ Digite um usuário'); return; }
+  state.user = user;
+  showToast('🚀 Conta criada! Entrando...');
+  setTimeout(() => {
+    document.getElementById('login-screen').classList.add('hidden');
+    setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 400);
+  }, 1000);
 }
 function showLoginForm(){
   document.getElementById('login-form').style.display='';
@@ -1634,11 +1646,12 @@ function updateIndicator(){
     indicator.style.width = rect.width + 'px';
     indicator.style.left = (rect.left - tbRect.left) + 'px';
     indicator.style.opacity = '1';
-    indicator.style.transform = 'translateY(-50%) scaleX(1.4) scaleY(0.8)';
     
+    // Efeito de "esticar" (elastic) na transição
+    indicator.style.transform = 'translateY(-50%) scaleX(1.2)';
     setTimeout(() => {
-      indicator.style.transform = 'translateY(-50%) scaleX(1) scaleY(1)';
-    }, 400);
+      indicator.style.transform = 'translateY(-50%) scaleX(1)';
+    }, 250);
   }
 }
 
@@ -1649,14 +1662,19 @@ function switchPage(id){
   
   if(id === 'profile'){
     if(newPage.classList.contains('active')) return;
+    if (state.user) {
+      const pName = document.getElementById('profile-name-disp');
+      const pAvatar = document.getElementById('profile-initials');
+      if (pName) pName.textContent = state.user;
+      if (pAvatar) pAvatar.textContent = state.user.charAt(0).toUpperCase();
+    }
     newPage.style.display = 'block';
     setTimeout(() => newPage.classList.add('active'), 10);
     return;
   }
 
   if(oldPage && (oldPage.id === 'page-profile' || oldPage.id === 'settings-panel')){
-    oldPage.classList.remove('active');
-    setTimeout(() => oldPage.style.display = 'none', 500);
+    closeProfile();
     if(id === 'home') return;
   }
 
@@ -2022,6 +2040,27 @@ function applyWallpaper(file){
 // ============================================================
 // PROFILE
 // ============================================================
+function closeProfile() {
+  const profile = document.getElementById('page-profile');
+  if (profile) {
+    profile.classList.remove('active');
+    setTimeout(() => { profile.style.display = 'none'; }, 500);
+  }
+}
+
+// Fechar perfil ao clicar fora
+document.addEventListener('mousedown', (e) => {
+  const profile = document.getElementById('page-profile');
+  if (profile && profile.classList.contains('active')) {
+    if (!profile.contains(e.target)) {
+      const tbApps = document.querySelectorAll('.tb-app');
+      let clickedOnApp = false;
+      tbApps.forEach(app => { if (app.contains(e.target)) clickedOnApp = true; });
+      if (!clickedOnApp) closeProfile();
+    }
+  }
+});
+
 function loadProfile(){
   const p=state.profile;
   const setTxt=(id,v)=>{const e=document.getElementById(id);if(e) e.textContent=v;};
